@@ -1,65 +1,139 @@
-# False Summits: Interactive Case Archive
+# False Summits: Interactive Case Archive — Version 2
 
 A polished static microsite prototype for the feature documentary **False Summits**.
 
-This prototype is designed as a public-facing documentary evidence archive for reconstructing the 2022 Gunung Tahan expedition that ended in the death of Raja Azlan Shah.
+This project is designed as a public-facing documentary evidence archive for reconstructing the 2022 Gunung Tahan expedition that ended in the death of Raja Azlan Shah.
 
-## What is included
+The site uses a restrained **case file folder + digital evidence database** design. It is intended to help visitors explore the timeline, evidence records, witness/role profiles, medical markers, route reconstruction, photo references, issue threads, relationship mapping, and discrepancies requiring clarification.
 
-- `index.html` — single-page microsite shell
-- `style.css` — forensic case-file/digital archive visual design
-- `app.js` — navigation, search, filters, modals, linked records
-- `data.js` — structured data for timeline events, evidence, people, medical markers, discrepancies
-- `README.md` — this file
+## Version 2 Features
 
-## Features
-
-- Tab-based navigation without reloads
-- Landing page / case file cover
-- Case overview dashboard
-- Expedition timeline
+- Animated case file landing screen
+- Dynamic archive dashboard counters
+- “Start Here: Understand the Case in 5 Steps” guided path
+- Issue-thread cards for thematic investigation
 - Searchable evidence locker
 - Evidence type and status filters
-- Evidence detail modal viewer
-- Witness profile cards
-- Placeholder route map with clickable markers
-- Medical tracker
-- Discrepancy matrix
-- Film / trailer placeholder section
+- Enhanced evidence modal viewer
+- Timeline event modals
+- Witness/profile modals
+- Stylised interactive route board with clickable markers
+- Visual symptom progression board
+- Medical marker modals
+- Evidence relationship map
+- Photo evidence wall with structured placeholders
+- Improved discrepancy comparison cards
+- Public evidence access badges: Public, Redacted, Summary Only, Private, Pending Review
 - Responsive desktop, tablet, and mobile layout
+- Reduced-motion support
+- No external dependencies
 
-## How to run locally
+## Files
+
+```txt
+false-summits-case/
+├── index.html
+├── style.css
+├── app.js
+├── data.js
+└── README.md
+```
+
+## How to Run Locally
 
 Open `index.html` directly in a browser.
 
 No server, backend, build step, npm install, or external framework is required.
 
-## How to deploy to GitHub Pages
+## How to Deploy to GitHub Pages
 
-1. Create a new GitHub repository.
-2. Upload these files to the repository root.
-3. Go to repository **Settings** → **Pages**.
-4. Set the source to the main branch root.
-5. Publish.
+1. Upload these files to the repository root.
+2. Go to repository **Settings → Pages**.
+3. Set the source to the `main` branch root.
+4. Save and publish.
 
-## Editing content
+## Editing Content
 
-Most archive content is stored inside `data.js`:
+Most archive content is stored inside `data.js`.
+
+Main arrays:
 
 - `timelineEvents`
 - `evidenceItems`
 - `people`
 - `medicalMarkers`
 - `discrepancies`
+- `routeMarkers`
+- `issueThreads`
+- `photoItems`
+- `relationshipMap`
 - `overviewModules`
+- `startHereSteps`
 
-To add new evidence, copy an existing object in `evidenceItems` and update the fields.
+## Adding a New Evidence Item
 
-## Public evidence safety
+Copy an existing object inside `evidenceItems` and update:
 
-This prototype includes public-facing summaries and placeholder file paths only.
+- `id`
+- `title`
+- `type`
+- `date`
+- `people`
+- `locations`
+- `tags`
+- `issueThreads`
+- `status`
+- `access`
+- `summary`
+- `editorialNote`
+- `fileUrl`
+- `linkedTimelineEvents`
+- `linkedDiscrepancies`
 
-Before publishing real documents, review and redact:
+Use stable evidence IDs such as:
+
+- `FS-TR-003` for transcripts
+- `FS-PM-002` for medical records
+- `FS-COM-002` for communications
+- `FS-PH-007` for photos
+
+## Adding a Route Marker
+
+Add a new object inside `routeMarkers`.
+
+Required fields:
+
+- `id`
+- `title`
+- `location`
+- `x`
+- `y`
+- `linkedTimelineEvents`
+- `people`
+- `summary`
+- `keyIssue`
+- `evidence`
+- `markerType`
+
+The `x` and `y` values are percentage positions on the CSS route board.
+
+## Adding a Photo
+
+Add a new object inside `photoItems`.
+
+If you have a real image, place it inside an assets folder such as:
+
+```txt
+assets/images/photo-name.jpg
+```
+
+Then update the `imageUrl` field.
+
+If `imageUrl` is empty, the site displays a styled placeholder frame.
+
+## Public Evidence Safety Reminder
+
+Before publishing real materials, review and redact:
 
 - phone numbers
 - home addresses
@@ -68,13 +142,19 @@ Before publishing real documents, review and redact:
 - full unredacted autopsy details not necessary for public understanding
 - private family information
 - unrelated third-party personal data
+- private WhatsApp numbers or screenshots
 
-The site’s editorial tone is intentionally neutral. It uses terms such as:
+## Editorial Tone Rules
 
-- unresolved discrepancy
-- duty-of-care question
-- information blackout
-- witness account
-- requires clarification
+Use neutral documentary language:
 
-Avoid unsupported accusatory language in public-facing copy.
+- “unresolved discrepancy”
+- “duty-of-care question”
+- “information blackout”
+- “witness account”
+- “requires clarification”
+- “public-interest question”
+
+Avoid unsupported accusatory language.
+
+The archive should distinguish between verified records, witness recollections, unresolved discrepancies, and editorial analysis.

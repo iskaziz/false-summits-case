@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="False Summits: Interactive Case Archive — a public-facing documentary evidence archive reconstructing the 2022 Gunung Tahan expedition." />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="False Summits: Interactive Case Archive — a public-facing documentary evidence archive for the Gunung Tahan reconstruction." />
   <title>False Summits: Interactive Case Archive</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <a class="skip-link" href="#main-content">Skip to archive content</a>
+  <a class="skip-link" href="#archiveContent">Skip to archive content</a>
 
   <div class="site-shell">
     <header class="archive-header" aria-label="Site header">
@@ -17,180 +17,221 @@
         <h1>False Summits</h1>
         <p>Interactive evidence archive for the Gunung Tahan documentary reconstruction.</p>
       </div>
-
-      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav">
-        <span></span><span></span><span></span>
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="primaryNav">
         <span class="sr-only">Toggle navigation</span>
+        <span></span><span></span><span></span>
       </button>
-
       <nav class="primary-nav" id="primaryNav" aria-label="Primary navigation">
-        <button class="nav-link is-active" data-section="landing">Home</button>
-        <button class="nav-link" data-section="overview">Overview</button>
-        <button class="nav-link" data-section="timeline">Timeline</button>
-        <button class="nav-link" data-section="evidence">Evidence</button>
-        <button class="nav-link" data-section="witnesses">Witnesses</button>
-        <button class="nav-link" data-section="map">Route Map</button>
-        <button class="nav-link" data-section="medical">Medical</button>
-        <button class="nav-link" data-section="discrepancies">Discrepancies</button>
-        <button class="nav-link" data-section="film">Film</button>
+        <button class="nav-link is-active" type="button" data-section="landing">Home</button>
+        <button class="nav-link" type="button" data-section="overview">Overview</button>
+        <button class="nav-link" type="button" data-section="timeline">Timeline</button>
+        <button class="nav-link" type="button" data-section="evidence">Evidence</button>
+        <button class="nav-link" type="button" data-section="witnesses">Witnesses</button>
+        <button class="nav-link" type="button" data-section="route">Route Map</button>
+        <button class="nav-link" type="button" data-section="medical">Medical</button>
+        <button class="nav-link" type="button" data-section="relationships">Relationships</button>
+        <button class="nav-link" type="button" data-section="photos">Photos</button>
+        <button class="nav-link" type="button" data-section="discrepancies">Discrepancies</button>
+        <button class="nav-link" type="button" data-section="film">Film</button>
       </nav>
     </header>
 
-    <main id="main-content">
-      <section id="landing" class="page-section is-active landing-section" data-page-title="Home">
-        <div class="case-cover">
+    <main id="archiveContent">
+      <section class="page-section landing-section is-active" id="landing" data-page-title="Case File Cover">
+        <div class="case-cover" id="caseCover">
           <div class="folder-tab">OPEN CASE FILE</div>
+          <div class="case-stamp">PUBLIC DOCUMENTARY ARCHIVE</div>
           <div class="case-cover-content">
-            <p class="eyebrow">Public Documentary Archive</p>
+            <span class="eyebrow">False Summits / Case Archive</span>
             <h2>False Summits</h2>
             <p class="lead">A structured reconstruction of the 2022 Gunung Tahan expedition that ended in the death of Raja Azlan Shah.</p>
             <p class="archive-copy">Explore witness accounts, official records, medical findings, route reconstruction, and unresolved questions through a restrained evidence-led interface.</p>
             <div class="hero-actions">
-              <button class="primary-action" data-section-jump="overview">Enter Archive</button>
-              <button class="secondary-action" data-section-jump="timeline">View Timeline</button>
-              <button class="secondary-action" data-section-jump="evidence">Open Evidence Locker</button>
-              <button class="secondary-action" data-section-jump="film">Watch Trailer</button>
+              <button class="primary-action" type="button" id="enterArchiveBtn">Enter Archive</button>
+              <button class="secondary-action" type="button" data-section-jump="timeline">View Timeline</button>
+              <button class="secondary-action" type="button" data-section-jump="evidence">Open Evidence Locker</button>
+              <button class="secondary-action" type="button" data-section-jump="film">Watch Trailer</button>
             </div>
           </div>
           <aside class="case-status-card" aria-label="Case status summary">
-            <span class="status-badge status-unresolved">Open Questions Remain</span>
+            <span class="eyebrow">Open Questions Remain</span>
             <dl>
               <div><dt>Core issue</dt><dd>Timeline reconstruction</dd></div>
-              <div><dt>Primary themes</dt><dd>Preparedness, duty of care, disclosure</dd></div>
-              <div><dt>Archive mode</dt><dd>Public redacted prototype</dd></div>
+              <div><dt>Primary themes</dt><dd>Medical distress, duty of care, disclosure</dd></div>
+              <div><dt>Archive mode</dt><dd>Public / redacted / summary-only prototype</dd></div>
             </dl>
           </aside>
         </div>
       </section>
 
-      <section id="overview" class="page-section" data-page-title="Case Overview">
+      <section class="page-section" id="overview" data-page-title="Case Overview">
         <div class="section-heading">
-          <p class="eyebrow">Case Overview</p>
+          <span class="eyebrow">Case Overview</span>
           <h2>Documentary reconstruction, not allegation.</h2>
           <p>The archive distinguishes between verified records, witness recollections, editorial analysis, and unresolved discrepancies.</p>
         </div>
+
         <div class="dashboard-grid">
           <article class="paper-panel wide-card">
-            <h3>Archive Briefing</h3>
+            <span class="eyebrow">Archive Briefing</span>
+            <h3>False Summits: Interactive Case Archive</h3>
             <p>False Summits follows Zara’s journey to retrace the final expedition of her husband, Raja Azlan Shah, and to confront the unanswered questions surrounding his death on Gunung Tahan.</p>
             <p>The public archive organises materials into a timeline of events and highlights areas where further clarification remains necessary.</p>
+            <div class="briefing-list">
+              <div><strong>Case Status</strong><span>Open Questions Remain</span></div>
+              <div><strong>Primary Issues</strong><span>Medical distress, duty of care, timeline discrepancies, information blackout</span></div>
+              <div><strong>Archive Mode</strong><span>Public / redacted / summary-only</span></div>
+              <div><strong>Documentary Frame</strong><span>Zara’s journey to seek clarity and systemic accountability</span></div>
+            </div>
           </article>
           <article class="metric-card"><span class="metric-number" id="timelineCount">0</span><span>Timeline Events</span></article>
           <article class="metric-card"><span class="metric-number" id="evidenceCount">0</span><span>Evidence Items</span></article>
-          <article class="metric-card"><span class="metric-number" id="peopleCount">0</span><span>Profiles</span></article>
+          <article class="metric-card"><span class="metric-number" id="peopleCount">0</span><span>Witness / Role Profiles</span></article>
+          <article class="metric-card"><span class="metric-number" id="medicalCount">0</span><span>Medical Markers</span></article>
           <article class="metric-card"><span class="metric-number" id="discrepancyCount">0</span><span>Issues Requiring Clarification</span></article>
         </div>
+
+        <section class="subsection">
+          <div class="section-heading compact-heading">
+            <span class="eyebrow">Start Here</span>
+            <h2>Understand the case in 5 steps.</h2>
+            <p>A guided path for visitors who are entering the archive for the first time.</p>
+          </div>
+          <div class="start-grid" id="startHereGrid"></div>
+        </section>
+
+        <section class="subsection">
+          <div class="section-heading compact-heading">
+            <span class="eyebrow">Issue Threads</span>
+            <h2>Follow the investigation by theme.</h2>
+            <p>Each thread links timeline events, evidence records, and questions requiring clarification.</p>
+          </div>
+          <div class="issue-thread-grid" id="issueThreadGrid"></div>
+        </section>
+
         <div class="module-grid" id="overviewModules"></div>
       </section>
 
-      <section id="timeline" class="page-section" data-page-title="Timeline">
+      <section class="page-section" id="timeline" data-page-title="Expedition Timeline">
         <div class="section-heading">
-          <p class="eyebrow">Chronological Reconstruction</p>
+          <span class="eyebrow">Chronological Reconstruction</span>
           <h2>Expedition timeline</h2>
-          <p>Each event links to evidence, people, locations, and questions raised.</p>
+          <p>Each event links to evidence, people, locations, issue threads, and questions raised.</p>
         </div>
         <div class="timeline-layout">
           <div class="timeline-list" id="timelineList"></div>
-          <aside class="timeline-context paper-panel">
+          <aside class="paper-panel sticky-panel">
             <h3>Timeline Method</h3>
             <p>Events are presented as witness-linked archive entries. Where exact dates or times require additional verification, entries use descriptive labels rather than unsupported precision.</p>
             <div class="legend-list">
-              <span><i class="dot verified"></i> Source-linked</span>
-              <span><i class="dot unresolved"></i> Requires clarification</span>
-              <span><i class="dot medical"></i> Medical issue</span>
+              <span><i class="dot verified"></i>Source-linked</span>
+              <span><i class="dot unresolved"></i>Requires clarification</span>
+              <span><i class="dot medical"></i>Medical issue</span>
             </div>
           </aside>
         </div>
       </section>
 
-      <section id="evidence" class="page-section" data-page-title="Evidence Locker">
+      <section class="page-section" id="evidence" data-page-title="Evidence Locker">
         <div class="section-heading">
-          <p class="eyebrow">Evidence Locker</p>
+          <span class="eyebrow">Evidence Locker</span>
           <h2>Searchable archive records</h2>
-          <p>Browse transcripts, medical summaries, route materials, and communication records using public-safe access labels.</p>
+          <p>Browse transcripts, medical summaries, route materials, visual records, and communication records using public-safe access labels.</p>
         </div>
-        <div class="filter-bar paper-panel">
+        <div class="filter-bar">
           <label for="evidenceSearch">Search archive</label>
-          <input id="evidenceSearch" type="search" placeholder="Search title, tags, people, summary..." />
+          <input id="evidenceSearch" type="search" placeholder="Search by title, tag, person, location, issue..." />
           <label for="typeFilter">Type</label>
-          <select id="typeFilter"><option value="all">All types</option></select>
+          <select id="typeFilter"></select>
           <label for="statusFilter">Status</label>
-          <select id="statusFilter"><option value="all">All statuses</option></select>
+          <select id="statusFilter"></select>
         </div>
-        <div class="evidence-results-meta" id="evidenceResultsMeta"></div>
+        <p class="evidence-results-meta" id="evidenceResultsMeta"></p>
         <div class="evidence-grid" id="evidenceGrid"></div>
       </section>
 
-      <section id="witnesses" class="page-section" data-page-title="Witness Profiles">
+      <section class="page-section" id="witnesses" data-page-title="Witness Profiles">
         <div class="section-heading">
-          <p class="eyebrow">Profiles</p>
+          <span class="eyebrow">Profiles</span>
           <h2>People and roles</h2>
           <p>Factual profile cards focused on relevance, linked evidence, and case issues.</p>
         </div>
         <div class="people-grid" id="peopleGrid"></div>
       </section>
 
-      <section id="map" class="page-section" data-page-title="Route Map">
+      <section class="page-section" id="route" data-page-title="Route Map">
         <div class="section-heading">
-          <p class="eyebrow">Route Reconstruction</p>
-          <h2>Gunung Tahan route map placeholder</h2>
-          <p>An illustrated route interface linking key locations to timeline events. Replace this placeholder with a final route illustration later.</p>
+          <span class="eyebrow">Route Reconstruction</span>
+          <h2>Gunung Tahan route board</h2>
+          <p>A stylised investigative route board linking key locations to timeline events, symptoms, and evidence. Replace this CSS illustration with a final trek illustration later.</p>
         </div>
-        <div class="route-map paper-panel">
-          <div class="map-path" aria-hidden="true"></div>
-          <div id="mapMarkers"></div>
+        <div class="paper-panel route-map" id="routeMap">
+          <div class="map-terrain terrain-a"></div>
+          <div class="map-terrain terrain-b"></div>
+          <div class="map-terrain terrain-c"></div>
+          <div class="map-path"></div>
+          <div class="map-markers" id="mapMarkers"></div>
         </div>
       </section>
 
-      <section id="medical" class="page-section" data-page-title="Medical Tracker">
+      <section class="page-section" id="medical" data-page-title="Medical Tracker">
         <div class="section-heading">
-          <p class="eyebrow">Medical Tracker</p>
+          <span class="eyebrow">Medical Tracker</span>
           <h2>Symptoms and risk markers</h2>
-          <p>Tracks reported distress symptoms across the route without making unsupported medical conclusions.</p>
+          <p>Tracks reported distress symptoms across expedition stages without making unsupported medical conclusions.</p>
         </div>
+        <div class="symptom-board" id="symptomBoard"></div>
         <div class="medical-stage-grid" id="medicalGrid"></div>
       </section>
 
-      <section id="discrepancies" class="page-section" data-page-title="Discrepancy Matrix">
+      <section class="page-section" id="relationships" data-page-title="Relationship Map">
         <div class="section-heading">
-          <p class="eyebrow">Discrepancy Matrix</p>
+          <span class="eyebrow">Evidence Relationship Map</span>
+          <h2>How people, records, events, and issues connect.</h2>
+          <p>This HTML/CSS map gives visitors a visual route through the archive without relying on an external graph library.</p>
+        </div>
+        <div class="relationship-board" id="relationshipBoard"></div>
+      </section>
+
+      <section class="page-section" id="photos" data-page-title="Photo Evidence Wall">
+        <div class="section-heading">
+          <span class="eyebrow">Photo Evidence Wall</span>
+          <h2>Visual reference records</h2>
+          <p>Placeholder photo cards are structured for future expedition photos, location references, transcript scans, maps, and production stills.</p>
+        </div>
+        <div class="photo-wall" id="photoWall"></div>
+      </section>
+
+      <section class="page-section" id="discrepancies" data-page-title="Discrepancy Matrix">
+        <div class="section-heading">
+          <span class="eyebrow">Discrepancy Matrix</span>
           <h2>Issues requiring clarification</h2>
           <p>Compares unresolved points across sources using neutral evidentiary language.</p>
         </div>
-        <div class="table-wrapper paper-panel">
-          <table class="discrepancy-table">
-            <thead>
-              <tr>
-                <th>Issue</th>
-                <th>Category</th>
-                <th>Sources</th>
-                <th>Why it matters</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="discrepancyTableBody"></tbody>
-          </table>
-        </div>
+        <div class="discrepancy-grid" id="discrepancyGrid"></div>
       </section>
 
-      <section id="film" class="page-section" data-page-title="Film">
+      <section class="page-section" id="film" data-page-title="Film">
         <div class="section-heading">
-          <p class="eyebrow">Feature Documentary</p>
+          <span class="eyebrow">Feature Documentary</span>
           <h2>False Summits</h2>
           <p>The archive is a companion resource for the documentary, connecting the film’s story to a structured evidentiary record.</p>
         </div>
         <div class="film-layout">
           <div class="trailer-placeholder paper-panel">
-            <div class="play-icon" aria-hidden="true">▶</div>
-            <p>Trailer placeholder</p>
+            <div>
+              <div class="play-icon">▶</div>
+              <p>Trailer placeholder</p>
+              <span class="tag status-summary">Replace with embedded trailer</span>
+            </div>
           </div>
           <article class="paper-panel">
             <h3>Synopsis</h3>
             <p>False Summits follows Zara’s journey to retrace the final expedition of her husband, Raja Azlan Shah, and to confront the unanswered questions surrounding his death on Gunung Tahan.</p>
             <p>Through witness accounts, official records, medical evidence, and route reconstruction, the film examines preparedness, duty of care, and the systems that failed to provide clarity when it mattered most.</p>
             <div class="press-actions">
-              <button class="secondary-action" data-section-jump="evidence">Review Archive</button>
-              <button class="secondary-action" data-section-jump="timeline">Open Timeline</button>
+              <button class="primary-action" type="button" data-section-jump="overview">Review Archive</button>
+              <button class="secondary-action" type="button" data-section-jump="timeline">Open Timeline</button>
             </div>
           </article>
         </div>
@@ -198,14 +239,14 @@
     </main>
 
     <footer class="archive-footer">
-      <p>This archive is presented as a documentary research resource for <strong>False Summits</strong>. It distinguishes between verified documents, witness recollections, unresolved discrepancies, and editorial analysis. Sensitive personal information may be redacted where necessary.</p>
+      <p>This archive is presented as a documentary research resource for False Summits. It distinguishes between verified documents, witness recollections, unresolved discrepancies, and editorial analysis. Sensitive personal information may be redacted where necessary.</p>
     </footer>
   </div>
 
   <div class="modal" id="detailModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-backdrop" data-close-modal></div>
     <div class="modal-panel" role="document">
-      <button class="modal-close" data-close-modal aria-label="Close detail viewer">×</button>
+      <button class="modal-close" type="button" data-close-modal aria-label="Close modal">×</button>
       <div id="modalContent"></div>
     </div>
   </div>
