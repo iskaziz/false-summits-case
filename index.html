@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="False Summits: Interactive Case Archive — a public-facing documentary evidence archive reconstructing the 2022 Gunung Tahan expedition." />
+  <title>False Summits: Interactive Case Archive</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to archive content</a>
+
+  <div class="site-shell">
+    <header class="archive-header" aria-label="Site header">
+      <div class="brand-block">
+        <span class="case-label">Case Archive</span>
+        <h1>False Summits</h1>
+        <p>Interactive evidence archive for the Gunung Tahan documentary reconstruction.</p>
+      </div>
+
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav">
+        <span></span><span></span><span></span>
+        <span class="sr-only">Toggle navigation</span>
+      </button>
+
+      <nav class="primary-nav" id="primaryNav" aria-label="Primary navigation">
+        <button class="nav-link is-active" data-section="landing">Home</button>
+        <button class="nav-link" data-section="overview">Overview</button>
+        <button class="nav-link" data-section="timeline">Timeline</button>
+        <button class="nav-link" data-section="evidence">Evidence</button>
+        <button class="nav-link" data-section="witnesses">Witnesses</button>
+        <button class="nav-link" data-section="map">Route Map</button>
+        <button class="nav-link" data-section="medical">Medical</button>
+        <button class="nav-link" data-section="discrepancies">Discrepancies</button>
+        <button class="nav-link" data-section="film">Film</button>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <section id="landing" class="page-section is-active landing-section" data-page-title="Home">
+        <div class="case-cover">
+          <div class="folder-tab">OPEN CASE FILE</div>
+          <div class="case-cover-content">
+            <p class="eyebrow">Public Documentary Archive</p>
+            <h2>False Summits</h2>
+            <p class="lead">A structured reconstruction of the 2022 Gunung Tahan expedition that ended in the death of Raja Azlan Shah.</p>
+            <p class="archive-copy">Explore witness accounts, official records, medical findings, route reconstruction, and unresolved questions through a restrained evidence-led interface.</p>
+            <div class="hero-actions">
+              <button class="primary-action" data-section-jump="overview">Enter Archive</button>
+              <button class="secondary-action" data-section-jump="timeline">View Timeline</button>
+              <button class="secondary-action" data-section-jump="evidence">Open Evidence Locker</button>
+              <button class="secondary-action" data-section-jump="film">Watch Trailer</button>
+            </div>
+          </div>
+          <aside class="case-status-card" aria-label="Case status summary">
+            <span class="status-badge status-unresolved">Open Questions Remain</span>
+            <dl>
+              <div><dt>Core issue</dt><dd>Timeline reconstruction</dd></div>
+              <div><dt>Primary themes</dt><dd>Preparedness, duty of care, disclosure</dd></div>
+              <div><dt>Archive mode</dt><dd>Public redacted prototype</dd></div>
+            </dl>
+          </aside>
+        </div>
+      </section>
+
+      <section id="overview" class="page-section" data-page-title="Case Overview">
+        <div class="section-heading">
+          <p class="eyebrow">Case Overview</p>
+          <h2>Documentary reconstruction, not allegation.</h2>
+          <p>The archive distinguishes between verified records, witness recollections, editorial analysis, and unresolved discrepancies.</p>
+        </div>
+        <div class="dashboard-grid">
+          <article class="paper-panel wide-card">
+            <h3>Archive Briefing</h3>
+            <p>False Summits follows Zara’s journey to retrace the final expedition of her husband, Raja Azlan Shah, and to confront the unanswered questions surrounding his death on Gunung Tahan.</p>
+            <p>The public archive organises materials into a timeline of events and highlights areas where further clarification remains necessary.</p>
+          </article>
+          <article class="metric-card"><span class="metric-number" id="timelineCount">0</span><span>Timeline Events</span></article>
+          <article class="metric-card"><span class="metric-number" id="evidenceCount">0</span><span>Evidence Items</span></article>
+          <article class="metric-card"><span class="metric-number" id="peopleCount">0</span><span>Profiles</span></article>
+          <article class="metric-card"><span class="metric-number" id="discrepancyCount">0</span><span>Issues Requiring Clarification</span></article>
+        </div>
+        <div class="module-grid" id="overviewModules"></div>
+      </section>
+
+      <section id="timeline" class="page-section" data-page-title="Timeline">
+        <div class="section-heading">
+          <p class="eyebrow">Chronological Reconstruction</p>
+          <h2>Expedition timeline</h2>
+          <p>Each event links to evidence, people, locations, and questions raised.</p>
+        </div>
+        <div class="timeline-layout">
+          <div class="timeline-list" id="timelineList"></div>
+          <aside class="timeline-context paper-panel">
+            <h3>Timeline Method</h3>
+            <p>Events are presented as witness-linked archive entries. Where exact dates or times require additional verification, entries use descriptive labels rather than unsupported precision.</p>
+            <div class="legend-list">
+              <span><i class="dot verified"></i> Source-linked</span>
+              <span><i class="dot unresolved"></i> Requires clarification</span>
+              <span><i class="dot medical"></i> Medical issue</span>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="evidence" class="page-section" data-page-title="Evidence Locker">
+        <div class="section-heading">
+          <p class="eyebrow">Evidence Locker</p>
+          <h2>Searchable archive records</h2>
+          <p>Browse transcripts, medical summaries, route materials, and communication records using public-safe access labels.</p>
+        </div>
+        <div class="filter-bar paper-panel">
+          <label for="evidenceSearch">Search archive</label>
+          <input id="evidenceSearch" type="search" placeholder="Search title, tags, people, summary..." />
+          <label for="typeFilter">Type</label>
+          <select id="typeFilter"><option value="all">All types</option></select>
+          <label for="statusFilter">Status</label>
+          <select id="statusFilter"><option value="all">All statuses</option></select>
+        </div>
+        <div class="evidence-results-meta" id="evidenceResultsMeta"></div>
+        <div class="evidence-grid" id="evidenceGrid"></div>
+      </section>
+
+      <section id="witnesses" class="page-section" data-page-title="Witness Profiles">
+        <div class="section-heading">
+          <p class="eyebrow">Profiles</p>
+          <h2>People and roles</h2>
+          <p>Factual profile cards focused on relevance, linked evidence, and case issues.</p>
+        </div>
+        <div class="people-grid" id="peopleGrid"></div>
+      </section>
+
+      <section id="map" class="page-section" data-page-title="Route Map">
+        <div class="section-heading">
+          <p class="eyebrow">Route Reconstruction</p>
+          <h2>Gunung Tahan route map placeholder</h2>
+          <p>An illustrated route interface linking key locations to timeline events. Replace this placeholder with a final route illustration later.</p>
+        </div>
+        <div class="route-map paper-panel">
+          <div class="map-path" aria-hidden="true"></div>
+          <div id="mapMarkers"></div>
+        </div>
+      </section>
+
+      <section id="medical" class="page-section" data-page-title="Medical Tracker">
+        <div class="section-heading">
+          <p class="eyebrow">Medical Tracker</p>
+          <h2>Symptoms and risk markers</h2>
+          <p>Tracks reported distress symptoms across the route without making unsupported medical conclusions.</p>
+        </div>
+        <div class="medical-stage-grid" id="medicalGrid"></div>
+      </section>
+
+      <section id="discrepancies" class="page-section" data-page-title="Discrepancy Matrix">
+        <div class="section-heading">
+          <p class="eyebrow">Discrepancy Matrix</p>
+          <h2>Issues requiring clarification</h2>
+          <p>Compares unresolved points across sources using neutral evidentiary language.</p>
+        </div>
+        <div class="table-wrapper paper-panel">
+          <table class="discrepancy-table">
+            <thead>
+              <tr>
+                <th>Issue</th>
+                <th>Category</th>
+                <th>Sources</th>
+                <th>Why it matters</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="discrepancyTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="film" class="page-section" data-page-title="Film">
+        <div class="section-heading">
+          <p class="eyebrow">Feature Documentary</p>
+          <h2>False Summits</h2>
+          <p>The archive is a companion resource for the documentary, connecting the film’s story to a structured evidentiary record.</p>
+        </div>
+        <div class="film-layout">
+          <div class="trailer-placeholder paper-panel">
+            <div class="play-icon" aria-hidden="true">▶</div>
+            <p>Trailer placeholder</p>
+          </div>
+          <article class="paper-panel">
+            <h3>Synopsis</h3>
+            <p>False Summits follows Zara’s journey to retrace the final expedition of her husband, Raja Azlan Shah, and to confront the unanswered questions surrounding his death on Gunung Tahan.</p>
+            <p>Through witness accounts, official records, medical evidence, and route reconstruction, the film examines preparedness, duty of care, and the systems that failed to provide clarity when it mattered most.</p>
+            <div class="press-actions">
+              <button class="secondary-action" data-section-jump="evidence">Review Archive</button>
+              <button class="secondary-action" data-section-jump="timeline">Open Timeline</button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="archive-footer">
+      <p>This archive is presented as a documentary research resource for <strong>False Summits</strong>. It distinguishes between verified documents, witness recollections, unresolved discrepancies, and editorial analysis. Sensitive personal information may be redacted where necessary.</p>
+    </footer>
+  </div>
+
+  <div class="modal" id="detailModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-panel" role="document">
+      <button class="modal-close" data-close-modal aria-label="Close detail viewer">×</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
