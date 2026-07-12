@@ -209,16 +209,46 @@ function renderPeople() {
 }
 
 function renderMap() {
-  qs("#mapMarkers").innerHTML = routeMarkers.map(marker => `
-    <button class="map-marker marker-${escapeAttr(marker.markerType)} reveal-card" type="button" style="left:${marker.x}%; top:${marker.y}%;" data-open-route="${escapeAttr(marker.id)}">
-      <span class="map-pin"></span>
-      <strong>${escapeHtml(marker.title)}</strong>
-      <small>${escapeHtml(marker.keyIssue)}</small>
+  const markerLayer = qs("#mapMarkers");
+  if (!markerLayer) return;
+
+  markerLayer.innerHTML = routeMarkers.map((marker, index) => `
+    <button class="route-hotspot marker-${escapeAttr(marker.markerType)} reveal-card" type="button" style="left:${marker.x}%; top:${marker.y}%;" data-open-route="${escapeAttr(marker.id)}" aria-label="Open route marker ${escapeAttr(marker.title)}">
+      <span class="hotspot-pulse"></span>
+      <span class="hotspot-number">${index + 1}</span>
+      <span class="hotspot-label"><strong>${escapeHtml(marker.title)}</strong><small>${escapeHtml(marker.keyIssue)}</small></span>
     </button>
   `).join("");
 
+  const routeFocusList = qs("#routeFocusList");
+  if (routeFocusList) {
+    routeFocusList.innerHTML = routeMarkers.filter(marker => marker.rajaFocus).map(marker => `
+      <button type="button" class="route-focus-item" data-open-route="${escapeAttr(marker.id)}">
+        <span class="tag">${escapeHtml(marker.track || "Route marker")}</span>
+        <strong>${escapeHtml(marker.title)}</strong>
+        <span>${escapeHtml(marker.rajaFocus)}</span>
+      </button>
+    `).join("");
+  }
+
+  const highlightGrid = qs("#routeHighlightGrid");
+  if (highlightGrid && typeof routeBoardHighlights !== "undefined") {
+    highlightGrid.innerHTML = routeBoardHighlights.map(item => `
+      <article class="route-highlight-card reveal-card">
+        <span class="tag">${escapeHtml(item.category)}</span>
+        <h3>${escapeHtml(item.title)}</h3>
+        <p>${escapeHtml(item.summary)}</p>
+        <div class="card-meta">${renderIssueTags(item.issueThreads || [])}</div>
+        <button type="button" data-open-route-highlight="${escapeAttr(item.id)}">Open Reading</button>
+      </article>
+    `).join("");
+  }
+
   qsa("[data-open-route]").forEach(button => {
     button.addEventListener("click", () => openRouteModal(button.dataset.openRoute));
+  });
+  qsa("[data-open-route-highlight]").forEach(button => {
+    button.addEventListener("click", () => openRouteHighlightModal(button.dataset.openRouteHighlight));
   });
 }
 
@@ -338,6 +368,8 @@ function bindModalInternalLinks() {
   qsa("#modalContent [data-open-person]").forEach(button => button.addEventListener("click", () => openPersonModal(button.dataset.openPerson)));
   qsa("#modalContent [data-open-discrepancy]").forEach(button => button.addEventListener("click", () => openDiscrepancyModal(button.dataset.openDiscrepancy)));
   qsa("#modalContent [data-open-issue]").forEach(button => button.addEventListener("click", () => openIssueModal(button.dataset.openIssue)));
+  qsa("#modalContent [data-open-route]").forEach(button => button.addEventListener("click", () => openRouteModal(button.dataset.openRoute)));
+  qsa("#modalContent [data-open-route-highlight]").forEach(button => button.addEventListener("click", () => openRouteHighlightModal(button.dataset.openRouteHighlight)));
   qsa("#modalContent [data-section-jump]").forEach(button => button.addEventListener("click", () => { closeModal(); activateSection(button.dataset.sectionJump); }));
 }
 
@@ -406,15 +438,30 @@ function openRouteModal(id) {
   const marker = routeMarkers.find(item => item.id === id);
   if (!marker) return;
   openModal(`
-    <span class="modal-kicker">Route Marker · ${escapeHtml(marker.id)}</span>
+    <span class="modal-kicker">Route Board Marker · ${escapeHtml(marker.id)} · ${escapeHtml(marker.track || "Route")}</span>
     <h2 id="modalTitle">${escapeHtml(marker.title)}</h2>
     <div class="modal-grid">
       <div class="paper-panel"><h3>Location</h3><p>${escapeHtml(marker.location)}</p><h3>Summary</h3><p>${escapeHtml(marker.summary)}</p></div>
-      <div class="paper-panel"><h3>Key issue</h3><p>${escapeHtml(marker.keyIssue)}</p><span class="tag">${escapeHtml(marker.markerType)}</span></div>
+      <div class="paper-panel"><h3>Raja Azlan Shah focus</h3><p>${escapeHtml(marker.rajaFocus || marker.keyIssue)}</p><h3>Key issue</h3><p>${escapeHtml(marker.keyIssue)}</p><span class="tag">${escapeHtml(marker.markerType)}</span></div>
     </div>
     <div class="modal-section"><h3>Related timeline events</h3>${renderTimelineLinks(marker.linkedTimelineEvents)}</div>
     <div class="modal-section"><h3>People involved</h3>${renderPersonLinks(marker.people)}</div>
     <div class="modal-section"><h3>Linked evidence</h3>${renderEvidenceLinks(marker.evidence)}</div>
+  `);
+}
+
+function openRouteHighlightModal(id) {
+  const item = typeof routeBoardHighlights !== "undefined" ? routeBoardHighlights.find(record => record.id === id) : null;
+  if (!item) return;
+  openModal(`
+    <span class="modal-kicker">Route Board Reading · ${escapeHtml(item.id)}</span>
+    <h2 id="modalTitle">${escapeHtml(item.title)}</h2>
+    <div class="modal-grid">
+      <div class="paper-panel"><h3>Reading</h3><p>${escapeHtml(item.summary)}</p><p><strong>Category:</strong> ${escapeHtml(item.category)}</p></div>
+      <div class="paper-panel"><h3>Issue threads</h3>${renderIssueTags(item.issueThreads || [], true)}</div>
+    </div>
+    <div class="modal-section"><h3>Linked route markers</h3>${renderRouteLinks(item.linkedMarkers || [])}</div>
+    <div class="modal-section"><h3>Linked evidence</h3>${renderEvidenceLinks(item.linkedEvidence || [])}</div>
   `);
 }
 

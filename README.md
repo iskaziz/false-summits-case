@@ -158,3 +158,41 @@ Use neutral documentary language:
 Avoid unsupported accusatory language.
 
 The archive should distinguish between verified records, witness recollections, unresolved discrepancies, and editorial analysis.
+
+## Version 3: Interactive Route Board Integration
+
+This package adds the generated Gunung Tahan route board as the central interactive reconstruction layer.
+
+### New route-board features
+
+- `assets/images/gunung-tahan-route-board.png` added as the primary visual guide.
+- The previous generic CSS route placeholder has been replaced by an interactive image-based route board.
+- Clickable hotspots now open modal cards for:
+  - Sungai Relau briefing
+  - Saturday ascent symptoms
+  - Kem Kor arrival and buddy-system issue
+  - 10:00 PM briefing and dinner
+  - Night push toward Kem Botak
+  - Tuesday information blackout
+  - “they all ok tu” communication issue
+  - Tuesday revelation call
+  - 26 March formal debriefing
+- Added route-board highlight cards focused on Raja Azlan Shah:
+  - Symptom cluster
+  - Kem Kor decision point
+  - Zara’s information pathway
+  - Formal debrief delay
+
+### New / updated data structures
+
+`data.js` now includes or expands:
+
+- `routeMarkers` with visual hotspot coordinates
+- `routeBoardHighlights`
+- new timeline events `TL-009` and `TL-010`
+- evidence item `FS-VIZ-001`
+- route-board-linked photo item `FS-PH-005`
+
+### Editorial note
+
+The route board is a documentary reconstruction tool. It is designed to separate mountain movement, medical distress, communication issues, and post-incident debriefing without presenting unresolved matters as legal conclusions.

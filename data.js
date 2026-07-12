@@ -104,12 +104,40 @@ const timelineEvents = [
     timeLabel: "Post-incident communication",
     location: "Ground contact communication layer",
     category: "Information Blackout",
-    summary: "Ground contacts reportedly circulated delayed updates to a broader group while Zara was omitted from or denied meaningful access to updates.",
+    summary: "Ground contacts reportedly circulated delayed-descent updates to a broader group while Zara was omitted from the update pathway. Zara’s account identifies this as the beginning of a communication gap at the point she was seeking urgent information.",
     people: ["P-002", "P-010"],
-    evidence: ["FS-COM-001", "FS-ZA-001"],
+    evidence: ["FS-COM-001", "FS-ZA-001", "FS-VIZ-001"],
     issues: ["ISS-005", "ISS-004"],
     status: "Requires Clarification",
-    questionsRaised: ["Who controlled information flow?", "Why was Zara not included in the update pathway?"]
+    questionsRaised: ["Who controlled information flow?", "Why was Zara not included in the update pathway?", "What information was known internally at the time Zara was asking for updates?"]
+  },
+  {
+    id: "TL-009",
+    title: "Tuesday revelation to Zara",
+    dateLabel: "Tuesday",
+    timeLabel: "Revelation call",
+    location: "Ground contact communication layer",
+    category: "Information Blackout",
+    summary: "Zara’s interview account describes a call in which she pressed for clarity after rain was denied as the reason for delay. The contact then revealed that a member had collapsed, leading Zara to demand identities and offer aid.",
+    people: ["P-002", "P-010"],
+    evidence: ["FS-ZA-001", "FS-COM-001", "FS-VIZ-001"],
+    issues: ["ISS-005", "ISS-004"],
+    status: "Witness Account",
+    questionsRaised: ["When was the collapse first known to ground contacts?", "Why was the identity not immediately disclosed to Zara?", "What rescue or aid options were available at that moment?"]
+  },
+  {
+    id: "TL-010",
+    title: "Formal debriefing at Zara’s house",
+    dateLabel: "Saturday, 26 March 2022",
+    timeLabel: "Formal debrief",
+    location: "Zara’s house",
+    category: "Post-Incident Debrief",
+    summary: "A formal debriefing took place at Zara’s house with Hasbullah, Medek, and others. The route board frames the six-day delay as attributed to Ariff and members who tested positive under KKM undergoing COVID-19 quarantine and fever recovery.",
+    people: ["P-002", "P-003", "P-005", "P-008"],
+    evidence: ["FS-TR-002", "FS-VIZ-001"],
+    issues: ["ISS-004", "ISS-005", "ISS-002"],
+    status: "Witness Account",
+    questionsRaised: ["What was clarified during the debriefing?", "Which timeline details were confirmed or left unresolved?", "Which participants were absent and why?"]
   }
 ];
 
@@ -200,6 +228,23 @@ const evidenceItems = [
     linkedDiscrepancies: ["DX-003"]
   },
   {
+    id: "FS-VIZ-001",
+    title: "Gunung Tahan Route Board Visual Reconstruction",
+    type: "Visual Reconstruction",
+    date: "Prototype visual guide",
+    people: ["P-001", "P-002", "P-003", "P-005", "P-006", "P-007", "P-008", "P-010"],
+    locations: ["Sungai Relau", "Kem Kor", "Kem Botak", "Ground communication layer"],
+    tags: ["route board", "visual reconstruction", "medical distress", "communication track", "information blackout"],
+    issueThreads: ["ISS-001", "ISS-002", "ISS-003", "ISS-004", "ISS-005"],
+    status: "Editorial Reconstruction",
+    access: "Public",
+    summary: "Interactive visual route board separating mountain elevation milestones from the ground communication track, with Raja Azlan Shah’s reported symptoms and Zara’s information pathway highlighted.",
+    editorialNote: "This visual is a documentary reconstruction based on transcript milestones and route references. It should be treated as an interpretive guide, not a legal finding.",
+    fileUrl: "assets/images/gunung-tahan-route-board.png",
+    linkedTimelineEvents: ["TL-001", "TL-002", "TL-003", "TL-004", "TL-005", "TL-006", "TL-007", "TL-008", "TL-009", "TL-010"],
+    linkedDiscrepancies: ["DX-001", "DX-002", "DX-003", "DX-004"]
+  },
+  {
     id: "FS-COM-001",
     title: "Tuesday Communication / Information Blackout Summary",
     type: "Communication",
@@ -220,7 +265,7 @@ const evidenceItems = [
 
 const people = [
   { id: "P-001", name: "Raja Azlan Shah", role: "Deceased climber", category: "Subject", summary: "Participant in the Gunung Tahan expedition whose physical condition and final movements are central to the reconstruction.", linkedEvidence: ["FS-TR-001", "FS-PM-001", "FS-MAP-001"], linkedTimelineEvents: ["TL-002", "TL-003", "TL-004", "TL-005", "TL-007"], keyIssues: ["Medical distress", "Final movements", "Cause of death"] },
-  { id: "P-002", name: "Zara", role: "Wife / documentary journey", category: "Family", summary: "Zara’s journey frames the documentary’s search for clarity and accountability after the expedition.", linkedEvidence: ["FS-ZA-001", "FS-COM-001"], linkedTimelineEvents: ["TL-008"], keyIssues: ["Information blackout", "Search for clarity", "Accountability"] },
+  { id: "P-002", name: "Zara", role: "Wife / documentary journey", category: "Family", summary: "Zara’s journey frames the documentary’s search for clarity and accountability after the expedition.", linkedEvidence: ["FS-ZA-001", "FS-COM-001"], linkedTimelineEvents: ["TL-008", "TL-009", "TL-010"], keyIssues: ["Information blackout", "Search for clarity", "Accountability"] },
   { id: "P-003", name: "Hasbullah", role: "Hiker / witness", category: "Expedition Participant", summary: "Witness profile linked to accounts of the ascent, reported symptoms, and unusual sleepiness.", linkedEvidence: ["FS-TR-001", "FS-TR-002"], linkedTimelineEvents: ["TL-001", "TL-002", "TL-003", "TL-006"], keyIssues: ["Medical distress", "Sleepiness", "Timeline"] },
   { id: "P-004", name: "Ariff", role: "Hiker / witness", category: "Expedition Participant", summary: "Participant profile used for cross-reference in the group transcript.", linkedEvidence: ["FS-TR-002"], linkedTimelineEvents: ["TL-006"], keyIssues: ["Group account", "Cross-reference"] },
   { id: "P-005", name: "Johan", role: "Hiker / witness", category: "Expedition Participant", summary: "Participant profile linked to the group account and timeline reconstruction.", linkedEvidence: ["FS-TR-002"], linkedTimelineEvents: ["TL-006"], keyIssues: ["Group movement", "Timeline"] },
@@ -228,7 +273,7 @@ const people = [
   { id: "P-007", name: "Zafrul", role: "Buddy-system reference", category: "Expedition Participant", summary: "Name associated with the Kem Kor buddy-system question requiring cross-reference.", linkedEvidence: ["FS-TR-001", "FS-TR-002"], linkedTimelineEvents: ["TL-005"], keyIssues: ["Buddy system", "Unresolved discrepancy"] },
   { id: "P-008", name: "Medek", role: "Hiker / witness", category: "Expedition Participant", summary: "Participant profile connected to the 26 March transcript and group account.", linkedEvidence: ["FS-TR-002"], linkedTimelineEvents: ["TL-006"], keyIssues: ["Group account", "Timeline"] },
   { id: "P-009", name: "Expedition Guides", role: "Expedition leadership / route management", category: "Leadership", summary: "Guide and leadership role profile linked to preparedness, pace monitoring, route decisions, and duty-of-care questions.", linkedEvidence: ["FS-TR-001", "FS-MAP-001"], linkedTimelineEvents: ["TL-001", "TL-002", "TL-006", "TL-007"], keyIssues: ["Duty of care", "Risk assessment", "Route movement"] },
-  { id: "P-010", name: "Ground Contacts", role: "Post-incident communication layer", category: "Communication", summary: "Ground contact profile linked to delayed updates and the reported omission of Zara from information flow.", linkedEvidence: ["FS-COM-001", "FS-ZA-001"], linkedTimelineEvents: ["TL-008"], keyIssues: ["Information blackout", "Disclosure", "Communication"] }
+  { id: "P-010", name: "Ground Contacts", role: "Post-incident communication layer", category: "Communication", summary: "Ground contact profile linked to delayed updates and the reported omission of Zara from information flow.", linkedEvidence: ["FS-COM-001", "FS-ZA-001"], linkedTimelineEvents: ["TL-008", "TL-009"], keyIssues: ["Information blackout", "Disclosure", "Communication"] }
 ];
 
 const medicalMarkers = [
@@ -247,21 +292,32 @@ const discrepancies = [
 ];
 
 const routeMarkers = [
-  { id: "RM-001", title: "Sungai Relau Base Camp", location: "Sungai Relau", x: 8, y: 68, linkedTimelineEvents: ["TL-001"], people: ["P-001", "P-003", "P-009"], summary: "Expedition begins after guide briefing and experience-level discussion.", keyIssue: "Preparedness and experience assessment", evidence: ["FS-TR-001", "FS-MAP-001"], markerType: "briefing" },
-  { id: "RM-002", title: "Ascent to Kem Kor", location: "Trail ascent", x: 27, y: 54, linkedTimelineEvents: ["TL-002", "TL-003"], people: ["P-001", "P-003", "P-009"], summary: "Medical distress markers begin appearing: diarrhea, slow pace, and unusual sleepiness.", keyIssue: "Medical monitoring and pace", evidence: ["FS-TR-001"], markerType: "medical" },
-  { id: "RM-003", title: "Kem Kor", location: "Kem Kor", x: 48, y: 42, linkedTimelineEvents: ["TL-004", "TL-005", "TL-006"], people: ["P-001", "P-006", "P-007", "P-009"], summary: "Stomach complaint, buddy-system toilet trip, briefing, dinner, and decision-point before night movement.", keyIssue: "Duty-of-care decision point", evidence: ["FS-TR-001", "FS-TR-002"], markerType: "decision" },
-  { id: "RM-004", title: "Night Push Toward Kem Botak", location: "Route toward Kem Botak", x: 70, y: 30, linkedTimelineEvents: ["TL-007"], people: ["P-001", "P-009"], summary: "The group continues into a high-risk night movement after fatigue and symptoms were reported.", keyIssue: "Route movement and risk assessment", evidence: ["FS-TR-001", "FS-MAP-001"], markerType: "route" },
-  { id: "RM-005", title: "Tuesday Communication Layer", location: "Post-incident communications", x: 78, y: 70, linkedTimelineEvents: ["TL-008"], people: ["P-002", "P-010"], summary: "Delayed updates and Zara’s reported omission from information flow.", keyIssue: "Information blackout", evidence: ["FS-COM-001", "FS-ZA-001"], markerType: "communication" }
+  { id: "RM-001", title: "Sungai Relau Base Camp", track: "Mountain Elevation Milestones", location: "Sungai Relau Base Camp", x: 10, y: 34, linkedTimelineEvents: ["TL-001"], people: ["P-001", "P-003", "P-009"], summary: "Saturday 12:00 PM: the expedition begins following a guide briefing on hiker experience levels.", keyIssue: "Preparedness and experience assessment", evidence: ["FS-TR-001", "FS-MAP-001", "FS-VIZ-001"], markerType: "briefing", rajaFocus: "Raja enters the expedition within a group decision-making structure where readiness and experience-level briefing become relevant to later duty-of-care questions." },
+  { id: "RM-002", title: "Saturday ascent to Kem Kor", track: "Mountain Elevation Milestones", location: "Ascent toward Kem Kor", x: 44, y: 24, linkedTimelineEvents: ["TL-002", "TL-003"], people: ["P-001", "P-003", "P-009"], summary: "Raja reportedly experiences diarrhea, walks slowly in the middle of the pack with a guide, and both Raja and Hasbullah experience unusual sleepiness.", keyIssue: "Medical distress and monitoring", evidence: ["FS-TR-001", "FS-TR-002", "FS-VIZ-001"], markerType: "medical", rajaFocus: "This is the first major symptom cluster: cirit-birit, slowed pace, and mengantuk. The archive frames this as a warning pattern requiring cross-reference." },
+  { id: "RM-003", title: "Arrival at Kem Kor", track: "Mountain Elevation Milestones", location: "Kem Kor", x: 48, y: 52, linkedTimelineEvents: ["TL-004", "TL-005"], people: ["P-001", "P-006", "P-007"], summary: "Raja complains of a churning stomach and enters the jungle to relieve himself under the buddy-system. The companion is identified as Rashdan or Zafrul in the reconstruction and remains an identity point to clarify.", keyIssue: "Buddy-system discrepancy", evidence: ["FS-TR-001", "FS-TR-002", "FS-VIZ-001"], markerType: "decision", rajaFocus: "The symptom progression continues at Kem Kor. The companion identity matters because it affects the reconstruction of supervision and observations immediately around Raja’s condition." },
+  { id: "RM-004", title: "10:00 PM briefing and dinner", track: "Mountain Elevation Milestones", location: "Kem Kor", x: 62, y: 47, linkedTimelineEvents: ["TL-006"], people: ["P-001", "P-003", "P-004", "P-005", "P-009"], summary: "The exhausted team holds a briefing and eats dinner before further movement.", keyIssue: "Decision point before night travel", evidence: ["FS-TR-001", "FS-TR-002", "FS-VIZ-001"], markerType: "briefing", rajaFocus: "This point asks whether Raja’s earlier symptoms were actively considered before the night movement decision." },
+  { id: "RM-005", title: "Saturday night push toward Kem Botak", track: "Mountain Elevation Milestones", location: "Route toward Kem Botak", x: 78, y: 42, linkedTimelineEvents: ["TL-007"], people: ["P-001", "P-009"], summary: "The hikers continue into the night toward Kem Botak after fatigue and symptoms had already been reported.", keyIssue: "High-risk night movement", evidence: ["FS-TR-001", "FS-MAP-001", "FS-VIZ-001"], markerType: "route", rajaFocus: "This is the central duty-of-care question on the route board: whether continuing into night movement was appropriate after the reported symptom cluster." },
+  { id: "RM-006", title: "Following Tuesday — information blackout", track: "Ground Communication Track", location: "Ground communication layer", x: 15, y: 75, linkedTimelineEvents: ["TL-008"], people: ["P-002", "P-010"], summary: "Ground contacts circulate a delayed-descent message to the broader group while Zara is omitted from the update pathway.", keyIssue: "Selective disclosure / omission", evidence: ["FS-COM-001", "FS-ZA-001", "FS-VIZ-001"], markerType: "communication", rajaFocus: "The communication track shifts from mountain movement to information control around Raja’s status and Zara’s access to urgent facts." },
+  { id: "RM-007", title: "'They all ok tu'", track: "Ground Communication Track", location: "Ground communication layer", x: 36, y: 77, linkedTimelineEvents: ["TL-008"], people: ["P-002", "P-010"], summary: "When Zara asks for updates, a contact reportedly reassures her with the phrase 'they all ok tu'. The archive labels this as a situation-misrepresentation issue requiring clarification.", keyIssue: "Situation misrepresented", evidence: ["FS-ZA-001", "FS-COM-001", "FS-VIZ-001"], markerType: "communication", rajaFocus: "This point matters because it potentially conflicts with information that a member had collapsed or that there was more serious uncertainty on the mountain." },
+  { id: "RM-008", title: "Tuesday revelation", track: "Ground Communication Track", location: "Ground communication layer", x: 61, y: 76, linkedTimelineEvents: ["TL-009"], people: ["P-002", "P-010"], summary: "Zara calls to ask if rain caused the delay; this is denied. A contact then reveals that a member collapsed, prompting Zara to demand identities and offer aid.", keyIssue: "Delayed disclosure of collapse", evidence: ["FS-ZA-001", "FS-COM-001", "FS-VIZ-001"], markerType: "communication", rajaFocus: "This is the moment Zara’s search for Raja’s identity and condition becomes urgent and explicit." },
+  { id: "RM-009", title: "26 March formal debriefing", track: "Ground Communication Track", location: "Zara’s house", x: 84, y: 76, linkedTimelineEvents: ["TL-010"], people: ["P-002", "P-003", "P-005", "P-008"], summary: "A formal debriefing takes place at Zara’s house with Hasbullah, Medek, and others after a six-day delay attributed to Ariff and KKM-positive members undergoing COVID-19 quarantine and fever recovery.", keyIssue: "Delayed formal explanation", evidence: ["FS-TR-002", "FS-VIZ-001"], markerType: "debrief", rajaFocus: "The debriefing becomes a later reconstruction point where the family seeks a clearer explanation of what happened to Raja." }
 ];
 
 const issueThreads = [
   { id: "ISS-001", title: "Medical Distress", description: "Tracks reported symptoms including diarrhea, stomach discomfort, sleepiness, slow pace, and exhaustion.", linkedEvents: ["TL-002", "TL-003", "TL-004"], linkedEvidence: ["FS-TR-001", "FS-TR-002", "FS-PM-001"], className: "thread-medical" },
   { id: "ISS-002", title: "Duty of Care", description: "Frames questions around monitoring, risk assessment, supervision, and leadership decisions.", linkedEvents: ["TL-001", "TL-002", "TL-004", "TL-005", "TL-006", "TL-007"], linkedEvidence: ["FS-TR-001", "FS-TR-002", "FS-MAP-001"], className: "thread-duty" },
-  { id: "ISS-003", title: "Route Movement", description: "Links key locations, movement decisions, and the night push toward Kem Botak.", linkedEvents: ["TL-001", "TL-002", "TL-007"], linkedEvidence: ["FS-MAP-001", "FS-TR-001"], className: "thread-route" },
-  { id: "ISS-004", title: "Timeline Discrepancy", description: "Identifies sequence issues and areas requiring cross-reference between transcripts.", linkedEvents: ["TL-003", "TL-004", "TL-005", "TL-006", "TL-008"], linkedEvidence: ["FS-TR-001", "FS-TR-002", "FS-COM-001"], className: "thread-discrepancy" },
-  { id: "ISS-005", title: "Information Blackout", description: "Focuses on delayed updates, selective disclosure, and Zara’s reported exclusion from information flow.", linkedEvents: ["TL-008"], linkedEvidence: ["FS-ZA-001", "FS-COM-001"], className: "thread-blackout" },
+  { id: "ISS-003", title: "Route Movement", description: "Links key locations, movement decisions, and the night push toward Kem Botak.", linkedEvents: ["TL-001", "TL-002", "TL-007"], linkedEvidence: ["FS-MAP-001", "FS-TR-001", "FS-VIZ-001"], className: "thread-route" },
+  { id: "ISS-004", title: "Timeline Discrepancy", description: "Identifies sequence issues and areas requiring cross-reference between transcripts.", linkedEvents: ["TL-003", "TL-004", "TL-005", "TL-006", "TL-008"], linkedEvidence: ["FS-TR-001", "FS-TR-002", "FS-COM-001", "FS-VIZ-001"], className: "thread-discrepancy" },
+  { id: "ISS-005", title: "Information Blackout", description: "Focuses on delayed updates, selective disclosure, and Zara’s reported exclusion from information flow.", linkedEvents: ["TL-008", "TL-009", "TL-010"], linkedEvidence: ["FS-ZA-001", "FS-COM-001", "FS-VIZ-001"], className: "thread-blackout" },
   { id: "ISS-006", title: "Regulatory Oversight", description: "Holds space for permits, route controls, organiser obligations, and official process review.", linkedEvents: ["TL-001"], linkedEvidence: ["FS-MAP-001"], className: "thread-regulatory" },
   { id: "ISS-007", title: "Cause of Death", description: "Connects public-safe medical summaries to the broader timeline reconstruction.", linkedEvents: ["TL-002", "TL-003", "TL-004"], linkedEvidence: ["FS-PM-001"], className: "thread-cause" }
+];
+
+const routeBoardHighlights = [
+  { id: "RBH-001", title: "Raja’s symptom cluster", category: "Medical distress", summary: "The route board places diarrhea, slow pace, stomach discomfort, and unusual sleepiness as a linked progression rather than isolated details.", linkedMarkers: ["RM-002", "RM-003"], linkedEvidence: ["FS-TR-001", "FS-TR-002"], issueThreads: ["ISS-001", "ISS-002"] },
+  { id: "RBH-002", title: "Kem Kor decision point", category: "Duty of care", summary: "Kem Kor is treated as the critical decision node: Raja had reported symptoms, the team was exhausted, and a briefing preceded further night movement.", linkedMarkers: ["RM-003", "RM-004", "RM-005"], linkedEvidence: ["FS-TR-001", "FS-TR-002"], issueThreads: ["ISS-002", "ISS-003", "ISS-004"] },
+  { id: "RBH-003", title: "Zara’s information pathway", category: "Information blackout", summary: "The ground communication track separates what Zara was reportedly told from later disclosure that a member had collapsed.", linkedMarkers: ["RM-006", "RM-007", "RM-008"], linkedEvidence: ["FS-ZA-001", "FS-COM-001"], issueThreads: ["ISS-005", "ISS-004"] },
+  { id: "RBH-004", title: "Formal debrief delay", category: "Post-incident reconstruction", summary: "The debriefing is placed after the Tuesday communication sequence to show when a fuller account was eventually sought at Zara’s house.", linkedMarkers: ["RM-009"], linkedEvidence: ["FS-TR-002"], issueThreads: ["ISS-004", "ISS-005"] }
 ];
 
 const photoItems = [
@@ -283,6 +339,7 @@ const relationshipMap = [
   { id: "REL-002", central: "Zara", nodeType: "person", linkedPerson: "P-002", connections: [
     { label: "Information Blackout", targetType: "issue", target: "ISS-005", note: "Disclosure and omission question" },
     { label: "Tuesday Communication", targetType: "timeline", target: "TL-008", note: "Delayed update issue" },
+      { label: "Tuesday Revelation", targetType: "timeline", target: "TL-009", note: "Collapse disclosure" },
     { label: "Zara Interview", targetType: "evidence", target: "FS-ZA-001", note: "Documentary journey" }
   ]},
   { id: "REL-003", central: "Hasbullah", nodeType: "person", linkedPerson: "P-003", connections: [

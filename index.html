@@ -27,7 +27,7 @@
         <button class="nav-link" type="button" data-section="timeline">Timeline</button>
         <button class="nav-link" type="button" data-section="evidence">Evidence</button>
         <button class="nav-link" type="button" data-section="witnesses">Witnesses</button>
-        <button class="nav-link" type="button" data-section="route">Route Map</button>
+        <button class="nav-link" type="button" data-section="route">Route Board</button>
         <button class="nav-link" type="button" data-section="medical">Medical</button>
         <button class="nav-link" type="button" data-section="relationships">Relationships</button>
         <button class="nav-link" type="button" data-section="photos">Photos</button>
@@ -159,19 +159,48 @@
         <div class="people-grid" id="peopleGrid"></div>
       </section>
 
-      <section class="page-section" id="route" data-page-title="Route Map">
+      <section class="page-section" id="route" data-page-title="Interactive Route Board">
         <div class="section-heading">
           <span class="eyebrow">Route Reconstruction</span>
-          <h2>Gunung Tahan route board</h2>
-          <p>A stylised investigative route board linking key locations to timeline events, symptoms, and evidence. Replace this CSS illustration with a final trek illustration later.</p>
+          <h2>Interactive Gunung Tahan route board</h2>
+          <p>This section now uses the full visual route board as the main reconstruction layer. Click the numbered hotspots to open Raja-focused evidence cards, symptom notes, timeline links, and communication-track details.</p>
         </div>
-        <div class="paper-panel route-map" id="routeMap">
-          <div class="map-terrain terrain-a"></div>
-          <div class="map-terrain terrain-b"></div>
-          <div class="map-terrain terrain-c"></div>
-          <div class="map-path"></div>
-          <div class="map-markers" id="mapMarkers"></div>
+
+        <div class="route-board-layout">
+          <div class="paper-panel route-board-panel" id="routeMap">
+            <div class="route-board-toolbar">
+              <div>
+                <span class="eyebrow">Visual Guide</span>
+                <h3>Mountain Elevation Milestones + Ground Communication Track</h3>
+              </div>
+              <div class="card-meta">
+                <span class="tag">Mountain Track</span>
+                <span class="tag status-summary">Medical Distress</span>
+                <span class="tag status-unresolved">Withheld Facts</span>
+              </div>
+            </div>
+            <div class="route-board-scroll" aria-label="Interactive Gunung Tahan route board image">
+              <img src="assets/images/gunung-tahan-route-board.png" alt="False Summits Gunung Tahan route board showing mountain milestones and ground communication track" class="route-board-image" />
+              <div class="map-markers route-board-hotspots" id="mapMarkers"></div>
+            </div>
+          </div>
+
+          <aside class="route-board-side paper-panel">
+            <span class="eyebrow">Raja Azlan Shah Focus</span>
+            <h3>What this board clarifies</h3>
+            <p>The board replaces the earlier generic route placeholder by combining the mountain route, symptom progression, night-movement decision point, and Zara’s communication pathway into one interactive reconstruction.</p>
+            <div class="route-focus-list" id="routeFocusList"></div>
+          </aside>
         </div>
+
+        <section class="subsection">
+          <div class="section-heading compact-heading">
+            <span class="eyebrow">Route Board Highlights</span>
+            <h2>Key investigative readings</h2>
+            <p>These cards help visitors read the diagram without losing the evidentiary structure.</p>
+          </div>
+          <div class="route-highlight-grid" id="routeHighlightGrid"></div>
+        </section>
       </section>
 
       <section class="page-section" id="medical" data-page-title="Medical Tracker">
