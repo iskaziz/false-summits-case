@@ -1,60 +1,81 @@
-# False Summits: Interactive Case Archive — Version 2
+# False Summits: Interactive Case Archive — V4 Compact Case Board
 
-A polished static microsite prototype for the feature documentary **False Summits**.
+A static, GitHub Pages-ready documentary microsite for the feature documentary **False Summits**.
 
-This project is designed as a public-facing documentary evidence archive for reconstructing the 2022 Gunung Tahan expedition that ended in the death of Raja Azlan Shah.
+Version 4 reorganises the previous route-board build into a denser, lower-scroll investigation interface.
 
-The site uses a restrained **case file folder + digital evidence database** design. It is intended to help visitors explore the timeline, evidence records, witness/role profiles, medical markers, route reconstruction, photo references, issue threads, relationship mapping, and discrepancies requiring clarification.
+## What changed in V4
 
-## Version 2 Features
-
-- Animated case file landing screen
-- Dynamic archive dashboard counters
-- “Start Here: Understand the Case in 5 Steps” guided path
-- Issue-thread cards for thematic investigation
-- Searchable evidence locker
-- Evidence type and status filters
-- Enhanced evidence modal viewer
-- Timeline event modals
-- Witness/profile modals
-- Stylised interactive route board with clickable markers
-- Visual symptom progression board
-- Medical marker modals
-- Evidence relationship map
-- Photo evidence wall with structured placeholders
-- Improved discrepancy comparison cards
-- Public evidence access badges: Public, Redacted, Summary Only, Private, Pending Review
-- Responsive desktop, tablet, and mobile layout
-- Reduced-motion support
-- No external dependencies
+- Reduced the main navigation to five sections:
+  - Case Board
+  - Evidence
+  - People
+  - Questions
+  - Film
+- Combined the previous Timeline, Route Map, Medical Tracker, Communication Track and Relationship elements into the central **Case Board**.
+- Converted long scrolling sections into:
+  - layer toggles
+  - a split-screen inspector panel
+  - compact evidence rows
+  - people selector + profile panel
+  - issue/discrepancy accordions
+  - modals only for full evidence detail
+- Kept the interactive Gunung Tahan Route Board image and marker system.
+- Preserved all existing core data in `data.js`.
 
 ## Files
 
 ```txt
-false-summits-case/
-├── index.html
-├── style.css
-├── app.js
-├── data.js
-└── README.md
+index.html
+style.css
+app.js
+data.js
+README.md
+assets/images/gunung-tahan-route-board.png
 ```
 
-## How to Run Locally
+## How to run locally
 
-Open `index.html` directly in a browser.
+Open `index.html` in a browser.
 
-No server, backend, build step, npm install, or external framework is required.
+No build tools, backend, package manager, or external framework is required.
 
-## How to Deploy to GitHub Pages
+## How to deploy on GitHub Pages
 
-1. Upload these files to the repository root.
-2. Go to repository **Settings → Pages**.
-3. Set the source to the `main` branch root.
-4. Save and publish.
+1. Unzip this package.
+2. Replace the files in the root of your GitHub repository.
+3. Commit and push.
+4. In GitHub, enable Pages from the repository settings if not already enabled.
 
-## Editing Content
+## How the compact layout works
 
-Most archive content is stored inside `data.js`.
+### Case Board
+
+The Case Board is the primary public interface. It uses the illustrated route board as the visual anchor, with layer buttons:
+
+- All
+- Route
+- Medical
+- Communication
+- Timeline
+
+Clicking a route marker, timeline row, medical marker, or issue thread loads details into the right-hand inspector panel on desktop. On mobile the inspector appears below the board.
+
+### Evidence
+
+The Evidence section now uses a compact table/list rather than large cards. Search and filters remain available.
+
+### People
+
+People are shown as a selector list. Clicking a person updates the profile panel with linked events and evidence.
+
+### Questions
+
+Discrepancies and investigative themes are grouped into accordions to reduce scrolling and improve focus.
+
+## Adding content
+
+Edit `data.js`.
 
 Main arrays:
 
@@ -67,132 +88,16 @@ Main arrays:
 - `issueThreads`
 - `photoItems`
 - `relationshipMap`
-- `overviewModules`
-- `startHereSteps`
 
-## Adding a New Evidence Item
+## Public evidence safety reminder
 
-Copy an existing object inside `evidenceItems` and update:
-
-- `id`
-- `title`
-- `type`
-- `date`
-- `people`
-- `locations`
-- `tags`
-- `issueThreads`
-- `status`
-- `access`
-- `summary`
-- `editorialNote`
-- `fileUrl`
-- `linkedTimelineEvents`
-- `linkedDiscrepancies`
-
-Use stable evidence IDs such as:
-
-- `FS-TR-003` for transcripts
-- `FS-PM-002` for medical records
-- `FS-COM-002` for communications
-- `FS-PH-007` for photos
-
-## Adding a Route Marker
-
-Add a new object inside `routeMarkers`.
-
-Required fields:
-
-- `id`
-- `title`
-- `location`
-- `x`
-- `y`
-- `linkedTimelineEvents`
-- `people`
-- `summary`
-- `keyIssue`
-- `evidence`
-- `markerType`
-
-The `x` and `y` values are percentage positions on the CSS route board.
-
-## Adding a Photo
-
-Add a new object inside `photoItems`.
-
-If you have a real image, place it inside an assets folder such as:
-
-```txt
-assets/images/photo-name.jpg
-```
-
-Then update the `imageUrl` field.
-
-If `imageUrl` is empty, the site displays a styled placeholder frame.
-
-## Public Evidence Safety Reminder
-
-Before publishing real materials, review and redact:
+Before publishing real documents, photos, audio or transcripts, review and redact sensitive data:
 
 - phone numbers
-- home addresses
 - IC/passport numbers
-- private medical identifiers
-- full unredacted autopsy details not necessary for public understanding
-- private family information
-- unrelated third-party personal data
-- private WhatsApp numbers or screenshots
+- private addresses
+- unrelated third-party information
+- unnecessary private medical identifiers
+- unredacted autopsy details that are not required for public understanding
 
-## Editorial Tone Rules
-
-Use neutral documentary language:
-
-- “unresolved discrepancy”
-- “duty-of-care question”
-- “information blackout”
-- “witness account”
-- “requires clarification”
-- “public-interest question”
-
-Avoid unsupported accusatory language.
-
-The archive should distinguish between verified records, witness recollections, unresolved discrepancies, and editorial analysis.
-
-## Version 3: Interactive Route Board Integration
-
-This package adds the generated Gunung Tahan route board as the central interactive reconstruction layer.
-
-### New route-board features
-
-- `assets/images/gunung-tahan-route-board.png` added as the primary visual guide.
-- The previous generic CSS route placeholder has been replaced by an interactive image-based route board.
-- Clickable hotspots now open modal cards for:
-  - Sungai Relau briefing
-  - Saturday ascent symptoms
-  - Kem Kor arrival and buddy-system issue
-  - 10:00 PM briefing and dinner
-  - Night push toward Kem Botak
-  - Tuesday information blackout
-  - “they all ok tu” communication issue
-  - Tuesday revelation call
-  - 26 March formal debriefing
-- Added route-board highlight cards focused on Raja Azlan Shah:
-  - Symptom cluster
-  - Kem Kor decision point
-  - Zara’s information pathway
-  - Formal debrief delay
-
-### New / updated data structures
-
-`data.js` now includes or expands:
-
-- `routeMarkers` with visual hotspot coordinates
-- `routeBoardHighlights`
-- new timeline events `TL-009` and `TL-010`
-- evidence item `FS-VIZ-001`
-- route-board-linked photo item `FS-PH-005`
-
-### Editorial note
-
-The route board is a documentary reconstruction tool. It is designed to separate mountain movement, medical distress, communication issues, and post-incident debriefing without presenting unresolved matters as legal conclusions.
+The archive should continue to distinguish between verified records, witness recollections, editorial analysis and unresolved discrepancies.

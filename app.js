@@ -1,621 +1,378 @@
-const state = {
-  activeSection: "landing",
-  search: "",
-  type: "all",
-  status: "all",
-  activeIssue: null
-};
+(function(){
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
-const qs = (selector, root = document) => root.querySelector(selector);
-const qsa = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+  const data = {
+    timelineEvents: safeArray('timelineEvents'),
+    evidenceItems: safeArray('evidenceItems'),
+    people: safeArray('people'),
+    medicalMarkers: safeArray('medicalMarkers'),
+    discrepancies: safeArray('discrepancies'),
+    routeMarkers: safeArray('routeMarkers'),
+    issueThreads: safeArray('issueThreads'),
+    photoItems: safeArray('photoItems'),
+    relationshipMap: safeArray('relationshipMap'),
+    overviewModules: safeArray('overviewModules'),
+    startHereSteps: safeArray('startHereSteps'),
+    routeBoardHighlights: safeArray('routeBoardHighlights')
+  };
 
-function initArchive() {
-  bindNavigation();
-  bindModal();
-  renderOverview();
-  renderTimeline();
-  renderEvidenceControls();
-  renderEvidence();
-  renderPeople();
-  renderMap();
-  renderMedical();
-  renderRelationships();
-  renderPhotos();
-  renderDiscrepancies();
-  initRevealObserver();
-}
+  const state = {
+    layer: 'all',
+    selectedMarkerId: data.routeMarkers[0]?.id || null,
+    selectedPersonId: data.people[0]?.id || null,
+    evidenceQuery: '',
+    typeFilter: 'all',
+    statusFilter: 'all',
+    accessFilter: 'all'
+  };
 
-function bindNavigation() {
-  qsa(".nav-link").forEach(button => {
-    button.addEventListener("click", () => activateSection(button.dataset.section));
-  });
+  document.addEventListener('DOMContentLoaded', init);
 
-  qsa("[data-section-jump]").forEach(button => {
-    button.addEventListener("click", () => activateSection(button.dataset.sectionJump));
-  });
+  function safeArray(name){
+    try { return Array.isArray(eval(name)) ? eval(name) : []; } catch(e) { return []; }
+  }
 
-  const enterBtn = qs("#enterArchiveBtn");
-  if (enterBtn) {
-    enterBtn.addEventListener("click", () => {
-      const cover = qs("#caseCover");
-      cover.classList.add("is-opening");
-      window.setTimeout(() => activateSection("overview"), 520);
+  function init(){
+    bindNav();
+    renderCounters();
+    renderStartSteps();
+    renderRouteBoard();
+    renderCompressedRail();
+    renderInspector();
+    populateEvidenceFilters();
+    bindEvidenceControls();
+    renderEvidence();
+    renderPeople();
+    renderQuestions();
+    bindModal();
+  }
+
+  function bindNav(){
+    $$('.nav-link').forEach(btn => btn.addEventListener('click', () => showSection(btn.dataset.section)));
+    $$('[data-section-jump]').forEach(btn => btn.addEventListener('click', () => showSection(btn.dataset.sectionJump)));
+    const toggle = $('#navToggle');
+    const nav = $('#primaryNav');
+    if(toggle && nav){
+      toggle.addEventListener('click', () => {
+        const open = nav.classList.toggle('is-open');
+        toggle.setAttribute('aria-expanded', String(open));
+      });
+    }
+  }
+
+  function showSection(id){
+    $$('.page-section').forEach(section => section.classList.toggle('is-active', section.id === id));
+    $$('.nav-link').forEach(btn => btn.classList.toggle('is-active', btn.dataset.section === id));
+    $('#primaryNav')?.classList.remove('is-open');
+    $('#navToggle')?.setAttribute('aria-expanded','false');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function renderCounters(){
+    const target = $('#dashboardCounters');
+    if(!target) return;
+    const counters = [
+      ['Timeline', data.timelineEvents.length],
+      ['Evidence', data.evidenceItems.length],
+      ['People', data.people.length],
+      ['Medical', data.medicalMarkers.length],
+      ['Questions', data.discrepancies.length]
+    ];
+    target.innerHTML = counters.map(([label,value]) => `<article class="counter-card"><strong>${value}</strong><span>${escapeHtml(label)}</span></article>`).join('');
+  }
+
+  function renderStartSteps(){
+    const target = $('#startSteps');
+    if(!target) return;
+    const steps = data.startHereSteps.length ? data.startHereSteps : [
+      {number:'01',title:'What happened?',copy:'Open the timeline layer.',target:'caseboard'},
+      {number:'02',title:'Where did it happen?',copy:'Follow the route board.',target:'caseboard'},
+      {number:'03',title:'What symptoms were reported?',copy:'Use the medical layer.',target:'caseboard'},
+      {number:'04',title:'What decisions were made?',copy:'Inspect decision points.',target:'caseboard'},
+      {number:'05',title:'What remains unresolved?',copy:'Open Questions.',target:'questions'}
+    ];
+    target.innerHTML = steps.map(step => `
+      <button class="start-step" type="button" data-start-target="${step.target || 'caseboard'}">
+        <span>${escapeHtml(step.number || '')}</span><strong>${escapeHtml(step.title)}</strong><p>${escapeHtml(step.copy || '')}</p>
+      </button>`).join('');
+    $$('[data-start-target]', target).forEach(btn => btn.addEventListener('click', () => {
+      const targetId = btn.dataset.startTarget || 'caseboard';
+      if(['overview','timeline','route','medical','relationships','photos','discrepancies'].includes(targetId)){
+        showSection('caseboard');
+        state.layer = layerFromLegacyTarget(targetId);
+        updateLayerTabs(); renderRouteBoard(); renderCompressedRail(); renderInspector();
+      } else showSection(targetId);
+    }));
+  }
+
+  function layerFromLegacyTarget(target){
+    return {overview:'all',timeline:'timeline',route:'route',medical:'medical',relationships:'all',photos:'all',discrepancies:'communication'}[target] || 'all';
+  }
+
+  function renderRouteBoard(){
+    const target = $('#routeHotspots');
+    if(!target) return;
+    const markers = filteredMarkers();
+    target.innerHTML = data.routeMarkers.map((m, idx) => {
+      const muted = markers.includes(m) ? '' : ' is-muted';
+      const selected = state.selectedMarkerId === m.id ? ' is-selected' : '';
+      return `<button class="hotspot${muted}${selected}" data-marker-id="${m.id}" data-type="${escapeHtml(m.markerType || 'route')}" style="left:${Number(m.x)||50}%;top:${Number(m.y)||50}%" type="button" title="${escapeAttr(m.title)}">${idx+1}</button>`;
+    }).join('');
+    $$('.hotspot', target).forEach(btn => btn.addEventListener('click', () => {
+      state.selectedMarkerId = btn.dataset.markerId;
+      renderRouteBoard();
+      renderInspector({type:'marker', id:state.selectedMarkerId});
+    }));
+    $$('#caseLayerTabs .layer-tab').forEach(btn => btn.addEventListener('click', () => {
+      state.layer = btn.dataset.layer;
+      updateLayerTabs(); renderRouteBoard(); renderCompressedRail(); renderInspector();
+    }));
+    updateLayerTabs();
+  }
+
+  function updateLayerTabs(){
+    $$('#caseLayerTabs .layer-tab').forEach(btn => btn.classList.toggle('is-active', btn.dataset.layer === state.layer));
+  }
+
+  function filteredMarkers(){
+    if(state.layer === 'all') return data.routeMarkers;
+    if(state.layer === 'medical') return data.routeMarkers.filter(m => ['medical','decision'].includes(m.markerType));
+    if(state.layer === 'communication') return data.routeMarkers.filter(m => ['communication','debrief'].includes(m.markerType));
+    if(state.layer === 'route') return data.routeMarkers.filter(m => ['route','briefing','decision'].includes(m.markerType));
+    if(state.layer === 'timeline') return data.routeMarkers;
+    return data.routeMarkers;
+  }
+
+  function renderCompressedRail(){
+    const target = $('#compressedRail');
+    if(!target) return;
+    let rows = [];
+    if(state.layer === 'medical') rows = data.medicalMarkers.map(item => ({kind:'medical', id:item.id, kicker:item.stage || 'Medical marker', title:item.symptom || item.title}));
+    else if(state.layer === 'communication') rows = data.timelineEvents.filter(e => (e.issues||[]).includes('ISS-005') || ['TL-008','TL-009','TL-010'].includes(e.id)).map(e => ({kind:'timeline', id:e.id, kicker:e.timeLabel || e.dateLabel, title:e.title}));
+    else rows = data.timelineEvents.map(e => ({kind:'timeline', id:e.id, kicker:e.timeLabel || e.dateLabel, title:e.title}));
+    target.innerHTML = rows.map(row => `<button class="rail-item" type="button" data-kind="${row.kind}" data-id="${row.id}"><span>${escapeHtml(row.kicker||'')}</span><strong>${escapeHtml(row.title)}</strong></button>`).join('');
+    $$('.rail-item', target).forEach(btn => btn.addEventListener('click', () => renderInspector({type:btn.dataset.kind, id:btn.dataset.id})));
+  }
+
+  function renderInspector(selection){
+    const target = $('#inspectorPanel');
+    if(!target) return;
+    let html = '';
+    if(selection?.type === 'timeline') html = timelineInspector(findById(data.timelineEvents, selection.id));
+    else if(selection?.type === 'medical') html = medicalInspector(findById(data.medicalMarkers, selection.id));
+    else if(selection?.type === 'issue') html = issueInspector(findById(data.issueThreads, selection.id));
+    else if(selection?.type === 'evidence') html = evidenceInspector(findById(data.evidenceItems, selection.id));
+    else html = markerInspector(findById(data.routeMarkers, state.selectedMarkerId) || data.routeMarkers[0]);
+    target.innerHTML = html || emptyInspector();
+    bindInspectorActions(target);
+  }
+
+  function markerInspector(m){
+    if(!m) return emptyInspector();
+    const events = (m.linkedTimelineEvents||[]).map(id => findById(data.timelineEvents,id)).filter(Boolean);
+    const evidence = (m.evidence||[]).map(id => findById(data.evidenceItems,id)).filter(Boolean);
+    const people = (m.people||[]).map(id => personName(id)).filter(Boolean);
+    return `<div class="inspector-content">
+      <span class="eyebrow">${escapeHtml(m.track || 'Route Marker')}</span>
+      <h2>${escapeHtml(m.title)}</h2>
+      <p>${escapeHtml(m.summary || '')}</p>
+      ${m.rajaFocus ? `<div class="modal-preview"><strong>Raja Azlan Shah focus</strong><p>${escapeHtml(m.rajaFocus)}</p></div>` : ''}
+      <div class="meta-grid">
+        <div class="meta-item"><span>Location</span><strong>${escapeHtml(m.location || '—')}</strong></div>
+        <div class="meta-item"><span>Key issue</span><strong>${escapeHtml(m.keyIssue || 'Requires clarification')}</strong></div>
+      </div>
+      ${badgeRow(people, 'blue')}
+      <h3>Linked timeline</h3>${miniList(events, 'timeline')}
+      <h3>Linked evidence</h3>${miniList(evidence, 'evidence')}
+    </div>`;
+  }
+
+  function timelineInspector(e){
+    if(!e) return emptyInspector();
+    const issues = (e.issues||[]).map(issueTitle).filter(Boolean);
+    const evidence = (e.evidence||[]).map(id => findById(data.evidenceItems,id)).filter(Boolean);
+    return `<div><span class="eyebrow">${escapeHtml(e.dateLabel || 'Timeline')}</span><h2>${escapeHtml(e.title)}</h2><p>${escapeHtml(e.summary || '')}</p>
+      <div class="meta-grid"><div class="meta-item"><span>Time</span><strong>${escapeHtml(e.timeLabel || '—')}</strong></div><div class="meta-item"><span>Location</span><strong>${escapeHtml(e.location || '—')}</strong></div><div class="meta-item"><span>Status</span><strong>${escapeHtml(e.status || '—')}</strong></div><div class="meta-item"><span>Category</span><strong>${escapeHtml(e.category || '—')}</strong></div></div>
+      ${badgeRow(issues)}
+      ${e.questionsRaised?.length ? `<h3>Questions raised</h3><ul>${e.questionsRaised.map(q=>`<li>${escapeHtml(q)}</li>`).join('')}</ul>` : ''}
+      <h3>Linked evidence</h3>${miniList(evidence, 'evidence')}</div>`;
+  }
+
+  function medicalInspector(m){
+    if(!m) return emptyInspector();
+    const evidence = (m.evidence||[]).map(id => findById(data.evidenceItems,id)).filter(Boolean);
+    return `<div><span class="eyebrow">Medical Marker</span><h2>${escapeHtml(m.symptom || m.title)}</h2><p>${escapeHtml(m.summary || '')}</p>
+      <div class="meta-grid"><div class="meta-item"><span>Stage</span><strong>${escapeHtml(m.stage || '—')}</strong></div><div class="meta-item"><span>Risk category</span><strong>${escapeHtml(m.riskCategory || '—')}</strong></div></div>
+      ${m.investigativeQuestion ? `<div class="modal-preview"><strong>Investigative question</strong><p>${escapeHtml(m.investigativeQuestion)}</p></div>` : ''}
+      <h3>Linked evidence</h3>${miniList(evidence, 'evidence')}</div>`;
+  }
+
+  function evidenceInspector(e){
+    if(!e) return emptyInspector();
+    const issues = (e.issues || e.tags || []).map(x => issueTitle(x) || x).filter(Boolean);
+    const events = (e.linkedTimelineEvents || []).map(id => findById(data.timelineEvents,id)).filter(Boolean);
+    return `<div><span class="eyebrow">${escapeHtml(e.id || 'Evidence')}</span><h2>${escapeHtml(e.title)}</h2><p>${escapeHtml(e.summary || '')}</p>
+      <div class="meta-grid"><div class="meta-item"><span>Type</span><strong>${escapeHtml(e.type || '—')}</strong></div><div class="meta-item"><span>Status</span><strong>${escapeHtml(e.status || '—')}</strong></div><div class="meta-item"><span>Access</span><strong>${escapeHtml(e.access || '—')}</strong></div><div class="meta-item"><span>Date</span><strong>${escapeHtml(e.date || '—')}</strong></div></div>
+      ${badgeRow(issues)}<h3>Linked events</h3>${miniList(events, 'timeline')}
+      <div class="modal-preview" aria-label="Document placeholder"><div class="redacted-line"></div><div class="redacted-line mid"></div><div class="redacted-line short"></div><p>Public file preview placeholder. Attach redacted source material when cleared.</p></div></div>`;
+  }
+
+  function issueInspector(issue){
+    if(!issue) return emptyInspector();
+    const events = (issue.linkedEvents||[]).map(id => findById(data.timelineEvents,id)).filter(Boolean);
+    const evidence = (issue.linkedEvidence||[]).map(id => findById(data.evidenceItems,id)).filter(Boolean);
+    return `<div><span class="eyebrow">Issue Thread</span><h2>${escapeHtml(issue.title)}</h2><p>${escapeHtml(issue.description || '')}</p><h3>Linked events</h3>${miniList(events, 'timeline')}<h3>Linked evidence</h3>${miniList(evidence, 'evidence')}</div>`;
+  }
+
+  function emptyInspector(){
+    return `<div class="inspector-empty"><span class="eyebrow">Inspector</span><h2>Select an item.</h2><p>Details will load here.</p></div>`;
+  }
+
+  function bindInspectorActions(root){
+    $$('[data-open-kind]', root).forEach(btn => btn.addEventListener('click', () => {
+      const kind = btn.dataset.openKind, id = btn.dataset.openId;
+      if(kind === 'evidence') openModal(evidenceInspector(findById(data.evidenceItems,id)));
+      else if(kind === 'timeline') renderInspector({type:'timeline',id});
+      else if(kind === 'medical') renderInspector({type:'medical',id});
+      else if(kind === 'issue') renderInspector({type:'issue',id});
+    }));
+  }
+
+  function miniList(items, kind){
+    if(!items.length) return `<p class="muted">No linked records in this prototype.</p>`;
+    return `<div class="action-row">${items.map(item => `<button class="inspector-action" type="button" data-open-kind="${kind}" data-open-id="${item.id}">${escapeHtml(item.id)} — ${escapeHtml(item.title || item.symptom || item.name || '')}</button>`).join('')}</div>`;
+  }
+
+  function populateEvidenceFilters(){
+    const typeSel = $('#typeFilter'), statusSel = $('#statusFilter'), accessSel = $('#accessFilter');
+    addOptions(typeSel, unique(data.evidenceItems.map(e => e.type)));
+    addOptions(statusSel, unique(data.evidenceItems.map(e => e.status)));
+    addOptions(accessSel, unique(data.evidenceItems.map(e => e.access)));
+  }
+
+  function addOptions(select, values){
+    if(!select) return;
+    values.filter(Boolean).sort().forEach(v => select.insertAdjacentHTML('beforeend', `<option value="${escapeAttr(v)}">${escapeHtml(v)}</option>`));
+  }
+
+  function bindEvidenceControls(){
+    const inputs = [$('#evidenceSearch'), $('#typeFilter'), $('#statusFilter'), $('#accessFilter')].filter(Boolean);
+    inputs.forEach(el => el.addEventListener('input', () => {
+      state.evidenceQuery = $('#evidenceSearch')?.value.toLowerCase().trim() || '';
+      state.typeFilter = $('#typeFilter')?.value || 'all';
+      state.statusFilter = $('#statusFilter')?.value || 'all';
+      state.accessFilter = $('#accessFilter')?.value || 'all';
+      renderEvidence();
+    }));
+  }
+
+  function evidenceFiltered(){
+    return data.evidenceItems.filter(e => {
+      const hay = [e.id,e.title,e.type,e.status,e.access,e.summary,(e.tags||[]).join(' '),(e.people||[]).map(personName).join(' '),(e.locations||[]).join(' ')].join(' ').toLowerCase();
+      return (!state.evidenceQuery || hay.includes(state.evidenceQuery)) &&
+        (state.typeFilter === 'all' || e.type === state.typeFilter) &&
+        (state.statusFilter === 'all' || e.status === state.statusFilter) &&
+        (state.accessFilter === 'all' || e.access === state.accessFilter);
     });
   }
 
-  const navToggle = qs("#navToggle");
-  const primaryNav = qs("#primaryNav");
-  navToggle.addEventListener("click", () => {
-    const isOpen = primaryNav.classList.toggle("is-open");
-    navToggle.setAttribute("aria-expanded", String(isOpen));
-  });
-}
-
-function activateSection(sectionId) {
-  state.activeSection = sectionId;
-  qsa(".page-section").forEach(section => section.classList.toggle("is-active", section.id === sectionId));
-  qsa(".nav-link").forEach(link => link.classList.toggle("is-active", link.dataset.section === sectionId));
-  qs("#primaryNav").classList.remove("is-open");
-  qs("#navToggle").setAttribute("aria-expanded", "false");
-  const section = qs(`#${sectionId}`);
-  if (section) document.title = `${section.dataset.pageTitle || "Archive"} | False Summits`;
-  window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
-}
-
-function renderOverview() {
-  qs("#timelineCount").textContent = timelineEvents.length;
-  qs("#evidenceCount").textContent = evidenceItems.length;
-  qs("#peopleCount").textContent = people.length;
-  qs("#medicalCount").textContent = medicalMarkers.length;
-  qs("#discrepancyCount").textContent = discrepancies.length;
-
-  qs("#startHereGrid").innerHTML = startHereSteps.map(step => `
-    <button class="start-card reveal-card" type="button" data-section-jump="${escapeAttr(step.target)}">
-      <span class="start-number">${escapeHtml(step.number)}</span>
-      <strong>${escapeHtml(step.title)}</strong>
-      <span>${escapeHtml(step.copy)}</span>
-    </button>
-  `).join("");
-
-  qsa("#startHereGrid [data-section-jump]").forEach(button => {
-    button.addEventListener("click", () => activateSection(button.dataset.sectionJump));
-  });
-
-  qs("#issueThreadGrid").innerHTML = issueThreads.map(thread => `
-    <button class="issue-thread-card ${escapeAttr(thread.className)} reveal-card" type="button" data-open-issue="${escapeAttr(thread.id)}">
-      <span class="tag">${escapeHtml(thread.id)}</span>
-      <strong>${escapeHtml(thread.title)}</strong>
-      <span>${escapeHtml(thread.description)}</span>
-      <small>${thread.linkedEvents.length} timeline event${thread.linkedEvents.length === 1 ? "" : "s"} · ${thread.linkedEvidence.length} evidence item${thread.linkedEvidence.length === 1 ? "" : "s"}</small>
-    </button>
-  `).join("");
-
-  qsa("[data-open-issue]").forEach(button => {
-    button.addEventListener("click", () => openIssueModal(button.dataset.openIssue));
-  });
-
-  qs("#overviewModules").innerHTML = overviewModules.map(module => `
-    <article class="paper-panel module-card reveal-card">
-      <span class="tag">${escapeHtml(module.tag)}</span>
-      <h3>${escapeHtml(module.title)}</h3>
-      <p>${escapeHtml(module.copy)}</p>
-    </article>
-  `).join("");
-}
-
-function renderTimeline() {
-  qs("#timelineList").innerHTML = timelineEvents.map(event => `
-    <article class="timeline-item reveal-card">
-      <div class="timeline-time">
-        <span>${escapeHtml(event.dateLabel)}</span>
-        <strong>${escapeHtml(event.timeLabel)}</strong>
-      </div>
-      <div>
-        <span class="tag">${escapeHtml(event.category)}</span>
-        <h3>${escapeHtml(event.title)}</h3>
-        <p>${escapeHtml(event.summary)}</p>
-        <div class="card-meta">${renderIssueTags(event.issues)}</div>
-      </div>
-      <button type="button" data-open-timeline="${escapeAttr(event.id)}">Open Event</button>
-    </article>
-  `).join("");
-
-  qsa("[data-open-timeline]").forEach(button => {
-    button.addEventListener("click", () => openTimelineModal(button.dataset.openTimeline));
-  });
-}
-
-function renderEvidenceControls() {
-  const typeFilter = qs("#typeFilter");
-  const statusFilter = qs("#statusFilter");
-  const uniqueTypes = [...new Set(evidenceItems.map(item => item.type))].sort();
-  const uniqueStatuses = [...new Set(evidenceItems.map(item => item.status))].sort();
-
-  typeFilter.innerHTML = `<option value="all">All types</option>` + uniqueTypes.map(type => `<option value="${escapeAttr(type)}">${escapeHtml(type)}</option>`).join("");
-  statusFilter.innerHTML = `<option value="all">All statuses</option>` + uniqueStatuses.map(status => `<option value="${escapeAttr(status)}">${escapeHtml(status)}</option>`).join("");
-
-  qs("#evidenceSearch").addEventListener("input", event => {
-    state.search = event.target.value.trim().toLowerCase();
-    renderEvidence();
-  });
-  typeFilter.addEventListener("change", event => {
-    state.type = event.target.value;
-    renderEvidence();
-  });
-  statusFilter.addEventListener("change", event => {
-    state.status = event.target.value;
-    renderEvidence();
-  });
-}
-
-function renderEvidence() {
-  const filtered = evidenceItems.filter(item => {
-    const peopleNames = item.people.map(id => getPersonName(id));
-    const issueNames = item.issueThreads.map(id => getIssueTitle(id));
-    const haystack = [item.id, item.title, item.type, item.status, item.access, item.summary, ...peopleNames, ...item.tags, ...item.locations, ...issueNames].join(" ").toLowerCase();
-    const matchesSearch = !state.search || haystack.includes(state.search);
-    const matchesType = state.type === "all" || item.type === state.type;
-    const matchesStatus = state.status === "all" || item.status === state.status;
-    return matchesSearch && matchesType && matchesStatus;
-  });
-
-  qs("#evidenceResultsMeta").textContent = `${filtered.length} archive record${filtered.length === 1 ? "" : "s"} shown`;
-  qs("#evidenceGrid").innerHTML = filtered.map(item => renderEvidenceCard(item)).join("") || `
-    <article class="paper-panel"><h3>No matching evidence</h3><p>Adjust your search or filters.</p></article>
-  `;
-
-  qsa("[data-open-evidence]").forEach(button => {
-    button.addEventListener("click", () => openEvidenceModal(button.dataset.openEvidence));
-  });
-}
-
-function renderEvidenceCard(item) {
-  return `
-    <article class="evidence-card reveal-card">
-      <div class="card-meta">
-        <span class="tag">${escapeHtml(item.id)}</span>
-        <span class="status-badge ${statusClass(item.access)}">${escapeHtml(item.access)}</span>
-      </div>
-      <h3>${escapeHtml(item.title)}</h3>
-      <p>${escapeHtml(item.summary)}</p>
-      <div class="card-meta">
-        <span class="tag">${escapeHtml(item.type)}</span>
-        <span class="tag">${escapeHtml(item.status)}</span>
-        <span class="tag">${escapeHtml(item.date)}</span>
-      </div>
-      <div class="card-meta">${renderIssueTags(item.issueThreads)}</div>
-      <div class="card-spacer"></div>
-      <button type="button" data-open-evidence="${escapeAttr(item.id)}">Open Evidence</button>
-    </article>
-  `;
-}
-
-function renderPeople() {
-  qs("#peopleGrid").innerHTML = people.map(person => `
-    <article class="person-card reveal-card">
-      <span class="tag">${escapeHtml(person.category)}</span>
-      <h3>${escapeHtml(person.name)}</h3>
-      <p><strong>${escapeHtml(person.role)}</strong></p>
-      <p>${escapeHtml(person.summary)}</p>
-      <div class="card-meta">${person.keyIssues.map(issue => `<span class="tag">${escapeHtml(issue)}</span>`).join("")}</div>
-      <div class="card-spacer"></div>
-      <button type="button" data-open-person="${escapeAttr(person.id)}">View Profile</button>
-    </article>
-  `).join("");
-
-  qsa("[data-open-person]").forEach(button => {
-    button.addEventListener("click", () => openPersonModal(button.dataset.openPerson));
-  });
-}
-
-function renderMap() {
-  const markerLayer = qs("#mapMarkers");
-  if (!markerLayer) return;
-
-  markerLayer.innerHTML = routeMarkers.map((marker, index) => `
-    <button class="route-hotspot marker-${escapeAttr(marker.markerType)} reveal-card" type="button" style="left:${marker.x}%; top:${marker.y}%;" data-open-route="${escapeAttr(marker.id)}" aria-label="Open route marker ${escapeAttr(marker.title)}">
-      <span class="hotspot-pulse"></span>
-      <span class="hotspot-number">${index + 1}</span>
-      <span class="hotspot-label"><strong>${escapeHtml(marker.title)}</strong><small>${escapeHtml(marker.keyIssue)}</small></span>
-    </button>
-  `).join("");
-
-  const routeFocusList = qs("#routeFocusList");
-  if (routeFocusList) {
-    routeFocusList.innerHTML = routeMarkers.filter(marker => marker.rajaFocus).map(marker => `
-      <button type="button" class="route-focus-item" data-open-route="${escapeAttr(marker.id)}">
-        <span class="tag">${escapeHtml(marker.track || "Route marker")}</span>
-        <strong>${escapeHtml(marker.title)}</strong>
-        <span>${escapeHtml(marker.rajaFocus)}</span>
-      </button>
-    `).join("");
+  function renderEvidence(){
+    const rows = evidenceFiltered();
+    const tbody = $('#evidenceTable tbody');
+    const mobile = $('#evidenceCardsMobile');
+    if(tbody){
+      tbody.innerHTML = rows.map(e => `<tr data-evidence-id="${e.id}"><td><strong>${escapeHtml(e.id)}</strong></td><td>${escapeHtml(e.type||'')}</td><td><div class="table-title">${escapeHtml(e.title)}</div><small>${escapeHtml(truncate(e.summary||'',120))}</small></td><td>${escapeHtml(e.status||'')}</td><td>${badgeRow((e.issues||e.tags||[]).slice(0,3).map(x=>issueTitle(x)||x))}</td><td><button class="inspector-action" type="button">Open</button></td></tr>`).join('');
+      $$('tr[data-evidence-id]', tbody).forEach(row => row.addEventListener('click', () => openModal(evidenceInspector(findById(data.evidenceItems,row.dataset.evidenceId)))));
+    }
+    if(mobile){
+      mobile.innerHTML = rows.map(e => `<button class="mobile-evidence-card" type="button" data-evidence-id="${e.id}"><span class="eyebrow">${escapeHtml(e.id)}</span><h3>${escapeHtml(e.title)}</h3><p>${escapeHtml(truncate(e.summary||'',130))}</p>${badgeRow([e.type,e.status,e.access].filter(Boolean))}</button>`).join('');
+      $$('[data-evidence-id]', mobile).forEach(btn => btn.addEventListener('click', () => openModal(evidenceInspector(findById(data.evidenceItems,btn.dataset.evidenceId)))));
+    }
   }
 
-  const highlightGrid = qs("#routeHighlightGrid");
-  if (highlightGrid && typeof routeBoardHighlights !== "undefined") {
-    highlightGrid.innerHTML = routeBoardHighlights.map(item => `
-      <article class="route-highlight-card reveal-card">
-        <span class="tag">${escapeHtml(item.category)}</span>
-        <h3>${escapeHtml(item.title)}</h3>
-        <p>${escapeHtml(item.summary)}</p>
-        <div class="card-meta">${renderIssueTags(item.issueThreads || [])}</div>
-        <button type="button" data-open-route-highlight="${escapeAttr(item.id)}">Open Reading</button>
-      </article>
-    `).join("");
+  function renderPeople(){
+    const list = $('#peopleList'), detail = $('#peopleDetail');
+    if(!list || !detail) return;
+    list.innerHTML = data.people.map(p => `<button class="person-button ${p.id===state.selectedPersonId?'is-active':''}" type="button" data-person-id="${p.id}"><strong>${escapeHtml(p.name)}</strong><span>${escapeHtml(p.role || p.category || '')}</span></button>`).join('');
+    $$('.person-button', list).forEach(btn => btn.addEventListener('click', () => {state.selectedPersonId = btn.dataset.personId; renderPeople();}));
+    const p = findById(data.people, state.selectedPersonId) || data.people[0];
+    if(!p){ detail.innerHTML = '<p>No people loaded.</p>'; return; }
+    const evidence = (p.linkedEvidence||[]).map(id => findById(data.evidenceItems,id)).filter(Boolean);
+    const events = (p.linkedTimelineEvents||[]).map(id => findById(data.timelineEvents,id)).filter(Boolean);
+    const rel = data.relationshipMap.find(r => r.linkedPerson === p.id);
+    detail.innerHTML = `<span class="eyebrow">${escapeHtml(p.category || 'Profile')}</span><h2>${escapeHtml(p.name)}</h2><p>${escapeHtml(p.summary || p.publicSummary || '')}</p><div class="meta-grid"><div class="meta-item"><span>Role</span><strong>${escapeHtml(p.role || '—')}</strong></div><div class="meta-item"><span>Case relevance</span><strong>${escapeHtml(p.relationshipToCase || p.category || '—')}</strong></div></div>${badgeRow(p.keyIssues || [])}<h3>Linked events</h3>${miniList(events,'timeline')}<h3>Linked evidence</h3>${miniList(evidence,'evidence')}${rel ? `<h3>Relationship map</h3><div class="action-row">${rel.connections.map(c => `<button class="inspector-action" type="button" data-rel-type="${c.targetType}" data-rel-target="${c.target}">${escapeHtml(c.label)}</button>`).join('')}</div>` : ''}`;
+    bindInspectorActions(detail);
+    $$('[data-rel-type]', detail).forEach(btn => btn.addEventListener('click', () => handleRelationship(btn.dataset.relType, btn.dataset.relTarget)));
   }
 
-  qsa("[data-open-route]").forEach(button => {
-    button.addEventListener("click", () => openRouteModal(button.dataset.openRoute));
-  });
-  qsa("[data-open-route-highlight]").forEach(button => {
-    button.addEventListener("click", () => openRouteHighlightModal(button.dataset.openRouteHighlight));
-  });
-}
-
-function renderMedical() {
-  const stages = ["Sungai Relau", "Ascent", "Kem Kor", "Night Push", "Post-Incident Review"];
-  qs("#symptomBoard").innerHTML = `
-    <div class="symptom-line"></div>
-    ${stages.map((stage, index) => `<div class="symptom-stage" style="--stage-index:${index}"><span>${escapeHtml(stage)}</span></div>`).join("")}
-    ${medicalMarkers.map(marker => `<button type="button" class="symptom-pin reveal-card" data-open-medical="${escapeAttr(marker.id)}" style="left:${medicalPosition(marker.stage)}%"><strong>${escapeHtml(marker.symptom)}</strong><span>${escapeHtml(marker.stage)}</span></button>`).join("")}
-  `;
-
-  qs("#medicalGrid").innerHTML = medicalMarkers.map(marker => `
-    <article class="medical-card reveal-card">
-      <span class="stage">${escapeHtml(marker.stage)}</span>
-      <h3>${escapeHtml(marker.symptom)}</h3>
-      <p>${escapeHtml(marker.summary)}</p>
-      <span class="tag">${escapeHtml(marker.riskCategory)}</span>
-      <div class="card-spacer"></div>
-      <button type="button" data-open-medical="${escapeAttr(marker.id)}">Open Marker</button>
-    </article>
-  `).join("");
-
-  qsa("[data-open-medical]").forEach(button => {
-    button.addEventListener("click", () => openMedicalModal(button.dataset.openMedical));
-  });
-}
-
-function renderRelationships() {
-  qs("#relationshipBoard").innerHTML = relationshipMap.map(group => `
-    <article class="relationship-cluster reveal-card">
-      <button class="relationship-central" type="button" data-open-person="${escapeAttr(group.linkedPerson)}">
-        <span class="tag">${escapeHtml(group.nodeType)}</span>
-        <strong>${escapeHtml(group.central)}</strong>
-      </button>
-      <div class="relationship-links">
-        ${group.connections.map(connection => `
-          <button type="button" class="relationship-node" data-rel-type="${escapeAttr(connection.targetType)}" data-rel-target="${escapeAttr(connection.target)}">
-            <strong>${escapeHtml(connection.label)}</strong>
-            <span>${escapeHtml(connection.note)}</span>
-          </button>
-        `).join("")}
-      </div>
-    </article>
-  `).join("");
-
-  qsa("#relationshipBoard [data-open-person]").forEach(button => button.addEventListener("click", () => openPersonModal(button.dataset.openPerson)));
-  qsa("#relationshipBoard [data-rel-type]").forEach(button => button.addEventListener("click", () => openRelationshipTarget(button.dataset.relType, button.dataset.relTarget)));
-}
-
-function renderPhotos() {
-  qs("#photoWall").innerHTML = photoItems.map(photo => `
-    <article class="photo-card reveal-card">
-      <button class="photo-frame" type="button" data-open-photo="${escapeAttr(photo.id)}" aria-label="Open ${escapeAttr(photo.title)}">
-        ${photo.imageUrl ? `<img src="${escapeAttr(photo.imageUrl)}" alt="${escapeAttr(photo.title)}">` : `<span>${escapeHtml(photo.id)}</span>`}
-      </button>
-      <div class="photo-caption">
-        <span class="tag">${escapeHtml(photo.category)}</span>
-        <h3>${escapeHtml(photo.title)}</h3>
-        <p>${escapeHtml(photo.caption)}</p>
-        <span class="status-badge ${statusClass(photo.access)}">${escapeHtml(photo.access)}</span>
-      </div>
-    </article>
-  `).join("");
-
-  qsa("[data-open-photo]").forEach(button => button.addEventListener("click", () => openPhotoModal(button.dataset.openPhoto)));
-}
-
-function renderDiscrepancies() {
-  qs("#discrepancyGrid").innerHTML = discrepancies.map(item => `
-    <article class="discrepancy-card reveal-card">
-      <div class="card-meta">
-        <span class="tag">${escapeHtml(item.category)}</span>
-        <span class="status-badge ${statusClass(item.status)}">${escapeHtml(item.status)}</span>
-      </div>
-      <h3>${escapeHtml(item.title)}</h3>
-      <div class="comparison-grid">
-        <div><span class="eyebrow">Source A</span><p>${escapeHtml(item.sourceA)}</p></div>
-        <div><span class="eyebrow">Source B</span><p>${escapeHtml(item.sourceB)}</p></div>
-      </div>
-      <p><strong>Conflict / difference:</strong> ${escapeHtml(item.conflict)}</p>
-      <p><strong>Why it matters:</strong> ${escapeHtml(item.whyItMatters)}</p>
-      <button type="button" data-open-discrepancy="${escapeAttr(item.id)}">Open Issue</button>
-    </article>
-  `).join("");
-
-  qsa("[data-open-discrepancy]").forEach(button => button.addEventListener("click", () => openDiscrepancyModal(button.dataset.openDiscrepancy)));
-}
-
-function bindModal() {
-  qsa("[data-close-modal]").forEach(el => el.addEventListener("click", closeModal));
-  document.addEventListener("keydown", event => {
-    if (event.key === "Escape") closeModal();
-  });
-}
-
-function openModal(html) {
-  qs("#modalContent").innerHTML = html;
-  const modal = qs("#detailModal");
-  modal.classList.add("is-open");
-  modal.setAttribute("aria-hidden", "false");
-  document.body.classList.add("modal-lock");
-  const closeBtn = qs(".modal-close");
-  if (closeBtn) closeBtn.focus();
-  bindModalInternalLinks();
-}
-
-function closeModal() {
-  const modal = qs("#detailModal");
-  modal.classList.remove("is-open");
-  modal.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("modal-lock");
-}
-
-function bindModalInternalLinks() {
-  qsa("#modalContent [data-open-evidence]").forEach(button => button.addEventListener("click", () => openEvidenceModal(button.dataset.openEvidence)));
-  qsa("#modalContent [data-open-timeline]").forEach(button => button.addEventListener("click", () => openTimelineModal(button.dataset.openTimeline)));
-  qsa("#modalContent [data-open-person]").forEach(button => button.addEventListener("click", () => openPersonModal(button.dataset.openPerson)));
-  qsa("#modalContent [data-open-discrepancy]").forEach(button => button.addEventListener("click", () => openDiscrepancyModal(button.dataset.openDiscrepancy)));
-  qsa("#modalContent [data-open-issue]").forEach(button => button.addEventListener("click", () => openIssueModal(button.dataset.openIssue)));
-  qsa("#modalContent [data-open-route]").forEach(button => button.addEventListener("click", () => openRouteModal(button.dataset.openRoute)));
-  qsa("#modalContent [data-open-route-highlight]").forEach(button => button.addEventListener("click", () => openRouteHighlightModal(button.dataset.openRouteHighlight)));
-  qsa("#modalContent [data-section-jump]").forEach(button => button.addEventListener("click", () => { closeModal(); activateSection(button.dataset.sectionJump); }));
-}
-
-function openTimelineModal(id) {
-  const event = timelineEvents.find(item => item.id === id);
-  if (!event) return;
-  openModal(`
-    <span class="modal-kicker">Timeline Event · ${escapeHtml(event.id)}</span>
-    <h2 id="modalTitle">${escapeHtml(event.title)}</h2>
-    <div class="modal-grid">
-      <div class="paper-panel"><h3>Summary</h3><p>${escapeHtml(event.summary)}</p><p><strong>Location:</strong> ${escapeHtml(event.location)}</p><p><strong>Time:</strong> ${escapeHtml(event.dateLabel)} · ${escapeHtml(event.timeLabel)}</p></div>
-      <div class="paper-panel"><h3>Questions raised</h3>${renderList(event.questionsRaised)}</div>
-    </div>
-    <div class="modal-section"><h3>Issue threads</h3>${renderIssueTags(event.issues, true)}</div>
-    <div class="modal-section"><h3>People involved</h3>${renderPersonLinks(event.people)}</div>
-    <div class="modal-section"><h3>Linked evidence</h3>${renderEvidenceLinks(event.evidence)}</div>
-  `);
-}
-
-function openEvidenceModal(id) {
-  const item = evidenceItems.find(record => record.id === id);
-  if (!item) return;
-  openModal(`
-    <span class="modal-kicker">Evidence Record · ${escapeHtml(item.id)}</span>
-    <h2 id="modalTitle">${escapeHtml(item.title)}</h2>
-    <div class="modal-grid">
-      <div class="paper-panel">
-        <h3>Record Summary</h3>
-        <p>${escapeHtml(item.summary)}</p>
-        <p><strong>Type:</strong> ${escapeHtml(item.type)}</p>
-        <p><strong>Status:</strong> ${escapeHtml(item.status)}</p>
-        <p><strong>Access:</strong> <span class="status-badge ${statusClass(item.access)}">${escapeHtml(item.access)}</span></p>
-        <p><strong>Date:</strong> ${escapeHtml(item.date)}</p>
-      </div>
-      <div class="paper-panel document-placeholder">
-        <h3>Document / Media Placeholder</h3>
-        <p><span class="redacted-line"></span> <span class="redacted-line short"></span></p>
-        <p class="muted">${escapeHtml(item.fileUrl || "No public file attached yet")}</p>
-      </div>
-    </div>
-    <div class="modal-section"><h3>Issue tags</h3>${renderIssueTags(item.issueThreads, true)}</div>
-    <div class="modal-section"><h3>People</h3>${renderPersonLinks(item.people)}</div>
-    <div class="modal-section"><h3>Locations</h3><p>${item.locations.map(escapeHtml).join(" · ")}</p></div>
-    <div class="modal-section"><h3>Linked timeline events</h3>${renderTimelineLinks(item.linkedTimelineEvents)}</div>
-    <div class="modal-section"><h3>Linked discrepancies</h3>${renderDiscrepancyLinks(item.linkedDiscrepancies || [])}</div>
-    <div class="modal-section"><h3>Editorial note</h3><p>${escapeHtml(item.editorialNote)}</p></div>
-  `);
-}
-
-function openPersonModal(id) {
-  const person = people.find(item => item.id === id);
-  if (!person) return;
-  openModal(`
-    <span class="modal-kicker">Profile · ${escapeHtml(person.category)}</span>
-    <h2 id="modalTitle">${escapeHtml(person.name)}</h2>
-    <div class="modal-grid">
-      <div class="paper-panel"><h3>Role</h3><p><strong>${escapeHtml(person.role)}</strong></p><p>${escapeHtml(person.summary)}</p></div>
-      <div class="paper-panel"><h3>Key issues</h3>${renderList(person.keyIssues)}</div>
-    </div>
-    <div class="modal-section"><h3>Linked evidence</h3>${renderEvidenceLinks(person.linkedEvidence)}</div>
-    <div class="modal-section"><h3>Linked timeline events</h3>${renderTimelineLinks(person.linkedTimelineEvents)}</div>
-  `);
-}
-
-function openRouteModal(id) {
-  const marker = routeMarkers.find(item => item.id === id);
-  if (!marker) return;
-  openModal(`
-    <span class="modal-kicker">Route Board Marker · ${escapeHtml(marker.id)} · ${escapeHtml(marker.track || "Route")}</span>
-    <h2 id="modalTitle">${escapeHtml(marker.title)}</h2>
-    <div class="modal-grid">
-      <div class="paper-panel"><h3>Location</h3><p>${escapeHtml(marker.location)}</p><h3>Summary</h3><p>${escapeHtml(marker.summary)}</p></div>
-      <div class="paper-panel"><h3>Raja Azlan Shah focus</h3><p>${escapeHtml(marker.rajaFocus || marker.keyIssue)}</p><h3>Key issue</h3><p>${escapeHtml(marker.keyIssue)}</p><span class="tag">${escapeHtml(marker.markerType)}</span></div>
-    </div>
-    <div class="modal-section"><h3>Related timeline events</h3>${renderTimelineLinks(marker.linkedTimelineEvents)}</div>
-    <div class="modal-section"><h3>People involved</h3>${renderPersonLinks(marker.people)}</div>
-    <div class="modal-section"><h3>Linked evidence</h3>${renderEvidenceLinks(marker.evidence)}</div>
-  `);
-}
-
-function openRouteHighlightModal(id) {
-  const item = typeof routeBoardHighlights !== "undefined" ? routeBoardHighlights.find(record => record.id === id) : null;
-  if (!item) return;
-  openModal(`
-    <span class="modal-kicker">Route Board Reading · ${escapeHtml(item.id)}</span>
-    <h2 id="modalTitle">${escapeHtml(item.title)}</h2>
-    <div class="modal-grid">
-      <div class="paper-panel"><h3>Reading</h3><p>${escapeHtml(item.summary)}</p><p><strong>Category:</strong> ${escapeHtml(item.category)}</p></div>
-      <div class="paper-panel"><h3>Issue threads</h3>${renderIssueTags(item.issueThreads || [], true)}</div>
-    </div>
-    <div class="modal-section"><h3>Linked route markers</h3>${renderRouteLinks(item.linkedMarkers || [])}</div>
-    <div class="modal-section"><h3>Linked evidence</h3>${renderEvidenceLinks(item.linkedEvidence || [])}</div>
-  `);
-}
-
-function openMedicalModal(id) {
-  const marker = medicalMarkers.find(item => item.id === id);
-  if (!marker) return;
-  openModal(`
-    <span class="modal-kicker">Medical Marker · ${escapeHtml(marker.id)}</span>
-    <h2 id="modalTitle">${escapeHtml(marker.symptom)}</h2>
-    <div class="modal-grid">
-      <div class="paper-panel"><h3>Summary</h3><p>${escapeHtml(marker.summary)}</p><p><strong>Stage:</strong> ${escapeHtml(marker.stage)}</p><p><strong>Risk category:</strong> ${escapeHtml(marker.riskCategory)}</p></div>
-      <div class="paper-panel"><h3>Investigative question</h3><p>${escapeHtml(marker.investigativeQuestion)}</p></div>
-    </div>
-    <div class="modal-section"><h3>Linked person</h3>${renderPersonLinks([marker.linkedPerson])}</div>
-    <div class="modal-section"><h3>Linked evidence</h3>${renderEvidenceLinks(marker.evidence)}</div>
-    <div class="modal-section"><h3>Linked timeline events</h3>${renderTimelineLinks(marker.linkedTimelineEvents)}</div>
-  `);
-}
-
-function openDiscrepancyModal(id) {
-  const item = discrepancies.find(record => record.id === id);
-  if (!item) return;
-  openModal(`
-    <span class="modal-kicker">Discrepancy · ${escapeHtml(item.id)}</span>
-    <h2 id="modalTitle">${escapeHtml(item.title)}</h2>
-    <div class="comparison-grid modal-comparison">
-      <div class="paper-panel"><span class="eyebrow">Source A</span><p>${escapeHtml(item.sourceA)}</p></div>
-      <div class="paper-panel"><span class="eyebrow">Source B</span><p>${escapeHtml(item.sourceB)}</p></div>
-    </div>
-    <div class="paper-panel"><h3>Conflict / difference</h3><p>${escapeHtml(item.conflict)}</p><h3>Why it matters</h3><p>${escapeHtml(item.whyItMatters)}</p><span class="status-badge ${statusClass(item.status)}">${escapeHtml(item.status)}</span></div>
-    <div class="modal-section"><h3>Linked timeline events</h3>${renderTimelineLinks(item.linkedTimelineEvents)}</div>
-    <div class="modal-section"><h3>Linked evidence</h3>${renderEvidenceLinks(item.evidence)}</div>
-  `);
-}
-
-function openIssueModal(id) {
-  const issue = issueThreads.find(item => item.id === id);
-  if (!issue) return;
-  openModal(`
-    <span class="modal-kicker">Issue Thread · ${escapeHtml(issue.id)}</span>
-    <h2 id="modalTitle">${escapeHtml(issue.title)}</h2>
-    <div class="paper-panel"><p>${escapeHtml(issue.description)}</p></div>
-    <div class="modal-section"><h3>Linked timeline events</h3>${renderTimelineLinks(issue.linkedEvents)}</div>
-    <div class="modal-section"><h3>Linked evidence</h3>${renderEvidenceLinks(issue.linkedEvidence)}</div>
-  `);
-}
-
-function openPhotoModal(id) {
-  const photo = photoItems.find(item => item.id === id);
-  if (!photo) return;
-  openModal(`
-    <span class="modal-kicker">Photo Record · ${escapeHtml(photo.id)}</span>
-    <h2 id="modalTitle">${escapeHtml(photo.title)}</h2>
-    <div class="modal-grid">
-      <div class="photo-frame modal-photo-frame">${photo.imageUrl ? `<img src="${escapeAttr(photo.imageUrl)}" alt="${escapeAttr(photo.title)}">` : `<span>${escapeHtml(photo.id)}</span>`}</div>
-      <div class="paper-panel"><h3>Metadata</h3><p><strong>Type:</strong> ${escapeHtml(photo.type)}</p><p><strong>Location:</strong> ${escapeHtml(photo.location)}</p><p><strong>Date:</strong> ${escapeHtml(photo.date)}</p><p><strong>Access:</strong> <span class="status-badge ${statusClass(photo.access)}">${escapeHtml(photo.access)}</span></p><p>${escapeHtml(photo.caption)}</p></div>
-    </div>
-    <div class="modal-section"><h3>Linked timeline events</h3>${renderTimelineLinks(photo.linkedTimelineEvents)}</div>
-    <div class="modal-section"><h3>Linked evidence</h3>${renderEvidenceLinks(photo.linkedEvidence)}</div>
-  `);
-}
-
-function openRelationshipTarget(type, target) {
-  const normalized = type.toLowerCase();
-  if (normalized === "evidence") return openEvidenceModal(target);
-  if (normalized === "timeline") return openTimelineModal(target);
-  if (normalized === "medical") return openMedicalModal(target);
-  if (normalized === "issue") return openIssueModal(target);
-  if (normalized === "section") { closeModal(); activateSection(target); return; }
-}
-
-function renderIssueTags(ids = [], asButtons = false) {
-  return ids.map(id => {
-    const issue = issueThreads.find(thread => thread.id === id);
-    const title = issue ? issue.title : id;
-    const cls = issue ? issue.className : "";
-    return asButtons
-      ? `<button class="tag issue-tag ${escapeAttr(cls)}" type="button" data-open-issue="${escapeAttr(id)}">${escapeHtml(title)}</button>`
-      : `<span class="tag issue-tag ${escapeAttr(cls)}">${escapeHtml(title)}</span>`;
-  }).join("");
-}
-
-function renderPersonLinks(ids = []) {
-  return ids.map(id => `<button type="button" class="link-pill" data-open-person="${escapeAttr(id)}">${escapeHtml(getPersonName(id))}</button>`).join("") || `<p class="muted">No linked profiles.</p>`;
-}
-
-function renderEvidenceLinks(ids = []) {
-  return ids.map(id => `<button type="button" class="link-pill" data-open-evidence="${escapeAttr(id)}">${escapeHtml(id)} · ${escapeHtml(getEvidenceTitle(id))}</button>`).join("") || `<p class="muted">No linked evidence.</p>`;
-}
-
-function renderTimelineLinks(ids = []) {
-  return ids.map(id => `<button type="button" class="link-pill" data-open-timeline="${escapeAttr(id)}">${escapeHtml(id)} · ${escapeHtml(getTimelineTitle(id))}</button>`).join("") || `<p class="muted">No linked timeline events.</p>`;
-}
-
-function renderDiscrepancyLinks(ids = []) {
-  return ids.map(id => `<button type="button" class="link-pill" data-open-discrepancy="${escapeAttr(id)}">${escapeHtml(id)} · ${escapeHtml(getDiscrepancyTitle(id))}</button>`).join("") || `<p class="muted">No linked discrepancy records.</p>`;
-}
-
-function renderList(items = []) {
-  return `<ul>${items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
-}
-
-function getPersonName(id) { return (people.find(item => item.id === id) || {}).name || id; }
-function getEvidenceTitle(id) { return (evidenceItems.find(item => item.id === id) || {}).title || id; }
-function getTimelineTitle(id) { return (timelineEvents.find(item => item.id === id) || {}).title || id; }
-function getDiscrepancyTitle(id) { return (discrepancies.find(item => item.id === id) || {}).title || id; }
-function getIssueTitle(id) { return (issueThreads.find(item => item.id === id) || {}).title || id; }
-
-function statusClass(value = "") {
-  const key = value.toLowerCase();
-  if (key.includes("public")) return "status-public";
-  if (key.includes("redacted")) return "status-redacted";
-  if (key.includes("summary")) return "status-summary";
-  if (key.includes("private")) return "status-private";
-  if (key.includes("pending")) return "status-pending";
-  if (key.includes("unresolved") || key.includes("requires")) return "status-unresolved";
-  return "status-neutral";
-}
-
-function medicalPosition(stage) {
-  const s = stage.toLowerCase();
-  if (s.includes("sungai")) return 8;
-  if (s.includes("ascent")) return 30;
-  if (s.includes("kem kor")) return 52;
-  if (s.includes("night")) return 74;
-  return 90;
-}
-
-function initRevealObserver() {
-  if (prefersReducedMotion() || !("IntersectionObserver" in window)) {
-    qsa(".reveal-card").forEach(card => card.classList.add("is-visible"));
-    return;
+  function handleRelationship(type, target){
+    if(type === 'evidence') openModal(evidenceInspector(findById(data.evidenceItems,target)));
+    else if(type === 'timeline'){ showSection('caseboard'); renderInspector({type:'timeline', id:target}); }
+    else if(type === 'medical'){ showSection('caseboard'); state.layer='medical'; updateLayerTabs(); renderRouteBoard(); renderCompressedRail(); renderInspector({type:'medical', id:target}); }
+    else if(type === 'issue'){ showSection('questions'); setTimeout(() => openAccordionById(target), 50); }
+    else showSection(target === 'medical' ? 'caseboard' : 'caseboard');
   }
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("is-visible");
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.12 });
-  qsa(".reveal-card").forEach(card => observer.observe(card));
-}
 
-function prefersReducedMotion() {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
+  function renderQuestions(){
+    const issueTarget = $('#issueAccordion');
+    const discTarget = $('#discrepancyAccordion');
+    if(issueTarget){
+      issueTarget.innerHTML = data.issueThreads.map((issue, i) => `<article class="accordion-item ${i===0?'is-open':''}" data-accordion-id="${issue.id}"><button class="accordion-trigger" type="button"><span>${escapeHtml(issue.title)}</span><span>+</span></button><div class="accordion-content"><p>${escapeHtml(issue.description||'')}</p><div class="action-row"><button class="inspector-action" type="button" data-inspect-issue="${issue.id}">Inspect on Case Board</button></div></div></article>`).join('');
+      bindAccordions(issueTarget);
+      $$('[data-inspect-issue]', issueTarget).forEach(btn => btn.addEventListener('click', () => {showSection('caseboard'); renderInspector({type:'issue', id:btn.dataset.inspectIssue});}));
+    }
+    if(discTarget){
+      discTarget.innerHTML = data.discrepancies.map((d, i) => discrepancyAccordionHtml(d,i)).join('');
+      bindAccordions(discTarget);
+      bindInspectorActions(discTarget);
+    }
+  }
 
-function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
-}
+  function discrepancyAccordionHtml(d, i){
+    const sourceA = d.sourceA || d.accountA || d.sources?.[0] || 'Source A requires review';
+    const sourceB = d.sourceB || d.accountB || d.sources?.[1] || 'Source B requires review';
+    return `<article class="accordion-item ${i===0?'is-open':''}" data-accordion-id="${d.id}"><button class="accordion-trigger" type="button"><span>${escapeHtml(d.title)}</span><span>+</span></button><div class="accordion-content"><p>${escapeHtml(d.summary || d.issue || '')}</p><div class="compare-grid"><div class="compare-cell"><strong>Source A</strong><p>${escapeHtml(String(sourceA))}</p></div><div class="compare-cell"><strong>Source B</strong><p>${escapeHtml(String(sourceB))}</p></div></div><p><strong>Why it matters:</strong> ${escapeHtml(d.whyItMatters || d.conflict || 'This affects the reconstruction and requires clarification.')}</p>${badgeRow([d.status || 'Unresolved', d.category || 'Discrepancy'], 'red')}${miniList((d.linkedTimelineEvents||[]).map(id=>findById(data.timelineEvents,id)).filter(Boolean),'timeline')}</div></article>`;
+  }
 
-function escapeAttr(value) {
-  return escapeHtml(value).replace(/`/g, "&#96;");
-}
+  function bindAccordions(root){
+    $$('.accordion-trigger', root).forEach(btn => btn.addEventListener('click', () => {
+      const item = btn.closest('.accordion-item');
+      const currently = item.classList.contains('is-open');
+      $$('.accordion-item', root).forEach(x => x.classList.remove('is-open'));
+      if(!currently) item.classList.add('is-open');
+    }));
+  }
 
-document.addEventListener("DOMContentLoaded", initArchive);
+  function openAccordionById(id){
+    const item = $(`[data-accordion-id="${CSS.escape(id)}"]`);
+    if(item){ $$('.accordion-item', item.parentElement).forEach(x => x.classList.remove('is-open')); item.classList.add('is-open'); item.scrollIntoView({block:'center', behavior:'smooth'}); }
+  }
+
+  function bindModal(){
+    $$('[data-close-modal]').forEach(el => el.addEventListener('click', closeModal));
+    document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+  }
+
+  function openModal(html){
+    $('#modalContent').innerHTML = html;
+    const modal = $('#detailModal');
+    modal.setAttribute('aria-hidden','false');
+    bindInspectorActions($('#modalContent'));
+  }
+
+  function closeModal(){ $('#detailModal')?.setAttribute('aria-hidden','true'); }
+
+  function findById(arr,id){ return arr.find(x => x.id === id); }
+  function unique(arr){ return Array.from(new Set(arr.filter(Boolean))); }
+  function personName(id){ return findById(data.people,id)?.name || id; }
+  function issueTitle(id){ return findById(data.issueThreads,id)?.title || (String(id).startsWith('ISS-') ? id : null); }
+  function truncate(s,n){ return String(s).length > n ? String(s).slice(0,n-1)+'…' : String(s); }
+  function badgeRow(items, tone=''){
+    const arr = (items||[]).filter(Boolean);
+    if(!arr.length) return '';
+    return `<div class="badge-row">${arr.map(item => `<span class="badge ${tone}">${escapeHtml(String(item))}</span>`).join('')}</div>`;
+  }
+  function escapeHtml(str){ return String(str ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch])); }
+  function escapeAttr(str){ return escapeHtml(str).replace(/`/g,'&#96;'); }
+})();
