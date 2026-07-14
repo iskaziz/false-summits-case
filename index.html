@@ -61,9 +61,28 @@
               </div>
             </div>
 
-            <div class="route-stage" id="routeStage">
-              <img src="assets/images/gunung-tahan-route-board.png" alt="False Summits Gunung Tahan Route Board visual reconstruction" />
-              <div class="route-hotspots" id="routeHotspots"></div>
+            <div class="map-toolbar" aria-label="Route board zoom controls">
+              <div class="map-toolbar__hint">Full board shown first. Zoom in to inspect route, symptoms, and communication track.</div>
+              <div class="map-controls">
+                <button class="map-btn" id="mapFitBtn" type="button">Fit</button>
+                <button class="map-btn" id="mapZoomOutBtn" type="button">−</button>
+                <span class="zoom-readout" id="zoomReadout">100%</span>
+                <button class="map-btn" id="mapZoomInBtn" type="button">+</button>
+                <button class="map-btn" id="mapResetBtn" type="button">Reset</button>
+                <button class="map-btn" id="mapFullscreenBtn" type="button">Full screen</button>
+              </div>
+            </div>
+
+            <div class="route-stage zoomable-map" id="routeStage" aria-label="Zoomable Gunung Tahan route board">
+              <div class="map-canvas" id="mapCanvas">
+                <img id="routeBoardImage" src="assets/images/gunung-tahan-route-board.png" alt="False Summits Gunung Tahan Route Board visual reconstruction" draggable="false" />
+                <div class="route-hotspots" id="routeHotspots"></div>
+              </div>
+            </div>
+
+            <div class="map-help-row">
+              <span>Drag to pan after zooming.</span>
+              <span>Click numbered markers to inspect Raja-focused route and communication details.</span>
             </div>
 
             <div class="compressed-rail" id="compressedRail" aria-label="Compressed timeline rail"></div>

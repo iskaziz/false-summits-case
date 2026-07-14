@@ -1,103 +1,66 @@
-# False Summits: Interactive Case Archive — V4 Compact Case Board
+# False Summits: Interactive Case Archive — V5 Zoom Route Board
 
-A static, GitHub Pages-ready documentary microsite for the feature documentary **False Summits**.
+Static microsite prototype for the feature documentary **False Summits**.
 
-Version 4 reorganises the previous route-board build into a denser, lower-scroll investigation interface.
+Version 5 keeps the compact five-section archive structure and upgrades the route board into a full zoomable map viewer.
 
-## What changed in V4
+## Sections
 
-- Reduced the main navigation to five sections:
-  - Case Board
-  - Evidence
-  - People
-  - Questions
-  - Film
-- Combined the previous Timeline, Route Map, Medical Tracker, Communication Track and Relationship elements into the central **Case Board**.
-- Converted long scrolling sections into:
-  - layer toggles
-  - a split-screen inspector panel
-  - compact evidence rows
-  - people selector + profile panel
-  - issue/discrepancy accordions
-  - modals only for full evidence detail
-- Kept the interactive Gunung Tahan Route Board image and marker system.
-- Preserved all existing core data in `data.js`.
+- Case Board
+- Evidence
+- People
+- Questions
+- Film
 
-## Files
+## V5 Route Board Improvements
+
+- The full Gunung Tahan route board is shown by default.
+- Users can zoom in, zoom out, reset, fit the map, and open full-screen map mode.
+- The map can be dragged/panned after zooming.
+- Clickable numbered hotspots remain locked to the route board image.
+- Route, medical, communication, and timeline layers are still controlled by the layer tabs.
+- Selected route markers update the inspector panel instead of creating extra scrolling.
+
+## File Structure
 
 ```txt
 index.html
 style.css
 app.js
 data.js
-README.md
 assets/images/gunung-tahan-route-board.png
 ```
 
-## How to run locally
+## How to Run Locally
 
-Open `index.html` in a browser.
+Open `index.html` directly in a browser.
 
-No build tools, backend, package manager, or external framework is required.
+No build tools, backend, or framework are required.
 
-## How to deploy on GitHub Pages
+## GitHub Pages Deployment
 
-1. Unzip this package.
-2. Replace the files in the root of your GitHub repository.
-3. Commit and push.
-4. In GitHub, enable Pages from the repository settings if not already enabled.
+1. Replace the files in your repository root.
+2. Commit and push.
+3. Enable GitHub Pages from the repository settings if not already enabled.
+4. Use the root folder as the publishing source.
 
-## How the compact layout works
+## Editing Hotspots
 
-### Case Board
+Route-board hotspots are stored in `data.js` under `routeMarkers`.
 
-The Case Board is the primary public interface. It uses the illustrated route board as the visual anchor, with layer buttons:
+Each marker uses percentage coordinates:
 
-- All
-- Route
-- Medical
-- Communication
-- Timeline
+```js
+{
+  id: "RM-001",
+  title: "Sungai Relau Base Camp",
+  x: 10,
+  y: 34
+}
+```
 
-Clicking a route marker, timeline row, medical marker, or issue thread loads details into the right-hand inspector panel on desktop. On mobile the inspector appears below the board.
+Adjust `x` and `y` to reposition a marker relative to the route-board image.
 
-### Evidence
+## Public Evidence Safety
 
-The Evidence section now uses a compact table/list rather than large cards. Search and filters remain available.
-
-### People
-
-People are shown as a selector list. Clicking a person updates the profile panel with linked events and evidence.
-
-### Questions
-
-Discrepancies and investigative themes are grouped into accordions to reduce scrolling and improve focus.
-
-## Adding content
-
-Edit `data.js`.
-
-Main arrays:
-
-- `timelineEvents`
-- `evidenceItems`
-- `people`
-- `medicalMarkers`
-- `discrepancies`
-- `routeMarkers`
-- `issueThreads`
-- `photoItems`
-- `relationshipMap`
-
-## Public evidence safety reminder
-
-Before publishing real documents, photos, audio or transcripts, review and redact sensitive data:
-
-- phone numbers
-- IC/passport numbers
-- private addresses
-- unrelated third-party information
-- unnecessary private medical identifiers
-- unredacted autopsy details that are not required for public understanding
-
-The archive should continue to distinguish between verified records, witness recollections, editorial analysis and unresolved discrepancies.
+This archive should distinguish clearly between verified records, witness recollections, unresolved discrepancies, and editorial analysis. Redact sensitive personal information before publishing source material publicly.

@@ -24,7 +24,15 @@
     evidenceQuery: '',
     typeFilter: 'all',
     statusFilter: 'all',
-    accessFilter: 'all'
+    accessFilter: 'all',
+    mapScale: 1,
+    mapX: 0,
+    mapY: 0,
+    isDraggingMap: false,
+    dragStartX: 0,
+    dragStartY: 0,
+    dragBaseX: 0,
+    dragBaseY: 0
   };
 
   document.addEventListener('DOMContentLoaded', init);
@@ -38,6 +46,8 @@
     renderCounters();
     renderStartSteps();
     renderRouteBoard();
+    bindMapControls();
+    resetMapView();
     renderCompressedRail();
     renderInspector();
     populateEvidenceFilters();
@@ -129,6 +139,96 @@
       updateLayerTabs(); renderRouteBoard(); renderCompressedRail(); renderInspector();
     }));
     updateLayerTabs();
+  }
+
+
+  function bindMapControls(){
+    const stage = $('#routeStage');
+    const canvas = $('#mapCanvas');
+    if(!stage || !canvas) return;
+
+    $('#mapFitBtn')?.addEventListener('click', resetMapView);
+    $('#mapResetBtn')?.addEventListener('click', resetMapView);
+    $('#mapZoomInBtn')?.addEventListener('click', () => zoomMap(0.22));
+    $('#mapZoomOutBtn')?.addEventListener('click', () => zoomMap(-0.22));
+    $('#mapFullscreenBtn')?.addEventListener('click', toggleMapFullscreen);
+
+    stage.addEventListener('pointerdown', (event) => {
+      if(event.target.closest('.hotspot') || event.target.closest('button')) return;
+      state.isDraggingMap = true;
+      state.dragStartX = event.clientX;
+      state.dragStartY = event.clientY;
+      state.dragBaseX = state.mapX;
+      state.dragBaseY = state.mapY;
+      stage.classList.add('is-dragging');
+      stage.setPointerCapture?.(event.pointerId);
+    });
+
+    stage.addEventListener('pointermove', (event) => {
+      if(!state.isDraggingMap) return;
+      state.mapX = state.dragBaseX + (event.clientX - state.dragStartX);
+      state.mapY = state.dragBaseY + (event.clientY - state.dragStartY);
+      updateMapTransform();
+    });
+
+    const stopDrag = (event) => {
+      if(!state.isDraggingMap) return;
+      state.isDraggingMap = false;
+      stage.classList.remove('is-dragging');
+      try { stage.releasePointerCapture?.(event.pointerId); } catch(e) {}
+    };
+    stage.addEventListener('pointerup', stopDrag);
+    stage.addEventListener('pointercancel', stopDrag);
+    stage.addEventListener('pointerleave', stopDrag);
+
+    stage.addEventListener('wheel', (event) => {
+      if(!event.ctrlKey && !event.metaKey) return;
+      event.preventDefault();
+      zoomMap(event.deltaY < 0 ? 0.12 : -0.12);
+    }, {passive:false});
+
+    document.addEventListener('fullscreenchange', () => {
+      if(!document.fullscreenElement) stage.classList.remove('is-fullscreen-fallback');
+      requestAnimationFrame(updateMapTransform);
+    });
+
+    window.addEventListener('resize', () => requestAnimationFrame(updateMapTransform));
+  }
+
+  function zoomMap(delta){
+    const next = clamp(Number((state.mapScale + delta).toFixed(2)), 1, 3.2);
+    if(next === state.mapScale) return;
+    state.mapScale = next;
+    if(state.mapScale === 1){ state.mapX = 0; state.mapY = 0; }
+    updateMapTransform();
+  }
+
+  function resetMapView(){
+    state.mapScale = 1;
+    state.mapX = 0;
+    state.mapY = 0;
+    updateMapTransform();
+  }
+
+  function updateMapTransform(){
+    const canvas = $('#mapCanvas');
+    if(!canvas) return;
+    canvas.style.transform = `translate(calc(-50% + ${state.mapX}px), calc(-50% + ${state.mapY}px)) scale(${state.mapScale})`;
+    const readout = $('#zoomReadout');
+    if(readout) readout.textContent = `${Math.round(state.mapScale * 100)}%`;
+    const stage = $('#routeStage');
+    if(stage) stage.classList.toggle('is-zoomed', state.mapScale > 1.01);
+  }
+
+  function toggleMapFullscreen(){
+    const stage = $('#routeStage');
+    if(!stage) return;
+    if(document.fullscreenElement){ document.exitFullscreen?.(); return; }
+    if(stage.requestFullscreen){
+      stage.requestFullscreen().then(() => requestAnimationFrame(updateMapTransform)).catch(() => stage.classList.toggle('is-fullscreen-fallback'));
+    } else {
+      stage.classList.toggle('is-fullscreen-fallback');
+    }
   }
 
   function updateLayerTabs(){
@@ -367,6 +467,7 @@
   function unique(arr){ return Array.from(new Set(arr.filter(Boolean))); }
   function personName(id){ return findById(data.people,id)?.name || id; }
   function issueTitle(id){ return findById(data.issueThreads,id)?.title || (String(id).startsWith('ISS-') ? id : null); }
+  function clamp(value, min, max){ return Math.min(max, Math.max(min, value)); }
   function truncate(s,n){ return String(s).length > n ? String(s).slice(0,n-1)+'…' : String(s); }
   function badgeRow(items, tone=''){
     const arr = (items||[]).filter(Boolean);
