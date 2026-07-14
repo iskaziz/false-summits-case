@@ -25,9 +25,13 @@
     typeFilter: 'all',
     statusFilter: 'all',
     accessFilter: 'all',
+    mapZoom: 1,
+    fitScale: 1,
     mapScale: 1,
     mapX: 0,
     mapY: 0,
+    naturalMapWidth: 1055,
+    naturalMapHeight: 1491,
     isDraggingMap: false,
     dragStartX: 0,
     dragStartY: 0,
@@ -127,7 +131,8 @@
     target.innerHTML = data.routeMarkers.map((m, idx) => {
       const muted = markers.includes(m) ? '' : ' is-muted';
       const selected = state.selectedMarkerId === m.id ? ' is-selected' : '';
-      return `<button class="hotspot${muted}${selected}" data-marker-id="${m.id}" data-type="${escapeHtml(m.markerType || 'route')}" style="left:${Number(m.x)||50}%;top:${Number(m.y)||50}%" type="button" title="${escapeAttr(m.title)}">${idx+1}</button>`;
+      const label = m.mapLabel || m.shortLabel || '';
+      return `<button class="hotspot${muted}${selected}" data-marker-id="${m.id}" data-type="${escapeHtml(m.markerType || 'route')}" style="left:${Number(m.x)||50}%;top:${Number(m.y)||50}%" type="button" title="${escapeAttr(m.title)}" aria-label="Open ${escapeAttr(m.title)}"><span class="hotspot-dot"></span><span class="hotspot-label">${escapeHtml(label)}</span></button>`;
     }).join('');
     $$('.hotspot', target).forEach(btn => btn.addEventListener('click', () => {
       state.selectedMarkerId = btn.dataset.markerId;
@@ -146,6 +151,19 @@
     const stage = $('#routeStage');
     const canvas = $('#mapCanvas');
     if(!stage || !canvas) return;
+
+    const img = $('#routeBoardImage');
+    if(img){
+      const syncNaturalSize = () => {
+        state.naturalMapWidth = img.naturalWidth || state.naturalMapWidth;
+        state.naturalMapHeight = img.naturalHeight || state.naturalMapHeight;
+        canvas.style.width = `${state.naturalMapWidth}px`;
+        canvas.style.height = `${state.naturalMapHeight}px`;
+        resetMapView();
+      };
+      if(img.complete) syncNaturalSize();
+      else img.addEventListener('load', syncNaturalSize, {once:true});
+    }
 
     $('#mapFitBtn')?.addEventListener('click', resetMapView);
     $('#mapResetBtn')?.addEventListener('click', resetMapView);
@@ -196,28 +214,60 @@
   }
 
   function zoomMap(delta){
-    const next = clamp(Number((state.mapScale + delta).toFixed(2)), 1, 3.2);
-    if(next === state.mapScale) return;
-    state.mapScale = next;
-    if(state.mapScale === 1){ state.mapX = 0; state.mapY = 0; }
+    const nextZoom = clamp(Number((state.mapZoom + delta).toFixed(2)), 1, 4);
+    if(nextZoom === state.mapZoom) return;
+    state.mapZoom = nextZoom;
     updateMapTransform();
   }
 
   function resetMapView(){
-    state.mapScale = 1;
+    state.mapZoom = 1;
     state.mapX = 0;
     state.mapY = 0;
     updateMapTransform();
   }
 
+  function calculateFitScale(){
+    const stage = $('#routeStage');
+    if(!stage) return 1;
+    const rect = stage.getBoundingClientRect();
+    const pad = 20;
+    const availableW = Math.max(240, rect.width - pad);
+    const availableH = Math.max(240, rect.height - pad);
+    const scale = Math.min(availableW / state.naturalMapWidth, availableH / state.naturalMapHeight);
+    return Math.max(0.12, Math.min(scale, 1));
+  }
+
+  function clampPan(){
+    const stage = $('#routeStage');
+    if(!stage) return;
+    const rect = stage.getBoundingClientRect();
+    const renderedW = state.naturalMapWidth * state.mapScale;
+    const renderedH = state.naturalMapHeight * state.mapScale;
+    const maxX = Math.max(0, (renderedW - rect.width) / 2 + 30);
+    const maxY = Math.max(0, (renderedH - rect.height) / 2 + 30);
+    state.mapX = clamp(state.mapX, -maxX, maxX);
+    state.mapY = clamp(state.mapY, -maxY, maxY);
+  }
+
   function updateMapTransform(){
     const canvas = $('#mapCanvas');
     if(!canvas) return;
+    state.fitScale = calculateFitScale();
+    state.mapScale = state.fitScale * state.mapZoom;
+    if(state.mapZoom <= 1.001){
+      state.mapX = 0;
+      state.mapY = 0;
+    } else {
+      clampPan();
+    }
+    canvas.style.width = `${state.naturalMapWidth}px`;
+    canvas.style.height = `${state.naturalMapHeight}px`;
     canvas.style.transform = `translate(calc(-50% + ${state.mapX}px), calc(-50% + ${state.mapY}px)) scale(${state.mapScale})`;
     const readout = $('#zoomReadout');
-    if(readout) readout.textContent = `${Math.round(state.mapScale * 100)}%`;
+    if(readout) readout.textContent = `${Math.round(state.mapZoom * 100)}%`;
     const stage = $('#routeStage');
-    if(stage) stage.classList.toggle('is-zoomed', state.mapScale > 1.01);
+    if(stage) stage.classList.toggle('is-zoomed', state.mapZoom > 1.01);
   }
 
   function toggleMapFullscreen(){

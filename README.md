@@ -64,3 +64,13 @@ Adjust `x` and `y` to reposition a marker relative to the route-board image.
 ## Public Evidence Safety
 
 This archive should distinguish clearly between verified records, witness recollections, unresolved discrepancies, and editorial analysis. Redact sensitive personal information before publishing source material publicly.
+
+## V5.1 Map Viewer Fix
+
+This build corrects the route board zoom behaviour:
+
+- The route board now calculates a true fit-to-screen base scale from the image's natural dimensions.
+- The **Fit** and **Reset** buttons return to the full-board overview.
+- Zoom now starts from the fitted full-board view, not from a cropped 100% image view.
+- Hotspots are locked to the same image coordinate layer, so they stay aligned while zooming and panning.
+- Visible hotspot markers are now small labelled dots (`M1–M5`, `C1–C3`, `D`) instead of misleading sequential numbers.
