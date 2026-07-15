@@ -97,3 +97,18 @@ This build refines the fullscreen route-board interface:
 - On mobile, the timeline rail auto-hides and the inspector starts collapsed.
 - A cinematic “Enter Map” overlay introduces the board and then clears the screen.
 - The map remains the primary visual element while Evidence, People, Questions, and Film remain available from the header.
+
+## V6.2 Map-First Unboxed Layout
+
+This build removes the boxed route-board presentation and makes the map itself fill the full visible screen beneath the header.
+
+Changes:
+
+- Route board fills the viewport instead of sitting inside a card/box.
+- Controls are compact floating pills over the map.
+- Inspector has been moved below the map to reduce visual clutter.
+- Timeline rail sits below the inspector as a compact horizontal strip.
+- Text, buttons, tables, accordions, and panels have been tightened to reduce scrolling.
+- Header and footer are slimmer.
+
+The map remains zoomable and pannable, with hotspots still aligned to the route-board image coordinate layer.
