@@ -85,3 +85,15 @@ This build corrects the route board zoom behaviour:
 - The inspector is now an overlay panel inside the map area so the board remains visible.
 - The compressed timeline rail moves to the footer strip beneath the map.
 - Evidence, People, Questions, and Film remain available through the main navigation.
+
+
+## V6.1 Refinement
+
+This build refines the fullscreen route-board interface:
+
+- Header height is reduced to give the route board more screen space.
+- The inspector is collapsible.
+- The timeline rail can be hidden.
+- On mobile, the timeline rail auto-hides and the inspector starts collapsed.
+- A cinematic “Enter Map” overlay introduces the board and then clears the screen.
+- The map remains the primary visual element while Evidence, People, Questions, and Film remain available from the header.

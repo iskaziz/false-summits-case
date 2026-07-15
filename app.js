@@ -51,6 +51,7 @@
     renderStartSteps();
     renderRouteBoard();
     bindMapControls();
+    bindV61Controls();
     resetMapView();
     renderCompressedRail();
     renderInspector();
@@ -281,6 +282,46 @@
     }
   }
 
+
+  function bindV61Controls(){
+    const inspectorToggle = $('#inspectorToggleBtn');
+    const inspectorClose = $('#inspectorCloseBtn');
+    const railToggle = $('#railToggleBtn');
+    const enterMap = $('#enterMapBtn');
+
+    const setInspector = (open) => {
+      document.body.classList.toggle('inspector-collapsed', !open);
+      if(inspectorToggle){
+        inspectorToggle.textContent = open ? 'Hide Inspector' : 'Show Inspector';
+        inspectorToggle.setAttribute('aria-expanded', String(open));
+      }
+    };
+
+    const setRail = (open) => {
+      document.body.classList.toggle('rail-collapsed', !open);
+      if(railToggle){
+        railToggle.textContent = open ? 'Hide Timeline' : 'Show Timeline';
+        railToggle.setAttribute('aria-expanded', String(open));
+      }
+      requestAnimationFrame(updateMapTransform);
+    };
+
+    inspectorToggle?.addEventListener('click', () => setInspector(document.body.classList.contains('inspector-collapsed')));
+    inspectorClose?.addEventListener('click', () => setInspector(false));
+    railToggle?.addEventListener('click', () => setRail(document.body.classList.contains('rail-collapsed')));
+    enterMap?.addEventListener('click', () => {
+      document.body.classList.add('map-entered', 'focus-map-mode');
+      setInspector(false);
+      if(window.innerWidth < 760) setRail(false);
+      requestAnimationFrame(resetMapView);
+    });
+
+    if(window.innerWidth < 760){
+      setRail(false);
+      setInspector(false);
+    }
+  }
+
   function updateLayerTabs(){
     $$('#caseLayerTabs .layer-tab').forEach(btn => btn.classList.toggle('is-active', btn.dataset.layer === state.layer));
   }
@@ -306,6 +347,11 @@
   }
 
   function renderInspector(selection){
+    if(selection && window.innerWidth >= 760){
+      document.body.classList.remove('inspector-collapsed');
+      const btn = $('#inspectorToggleBtn');
+      if(btn){ btn.textContent = 'Hide Inspector'; btn.setAttribute('aria-expanded','true'); }
+    }
     const target = $('#inspectorPanel');
     if(!target) return;
     let html = '';

@@ -54,6 +54,10 @@
               <button class="layer-tab" type="button" data-layer="communication">Communication</button>
               <button class="layer-tab" type="button" data-layer="timeline">Timeline</button>
             </div>
+            <div class="board-utility-controls">
+              <button class="map-btn inspector-toggle-btn" id="inspectorToggleBtn" type="button" aria-expanded="true">Hide Inspector</button>
+              <button class="map-btn rail-toggle-btn" id="railToggleBtn" type="button" aria-expanded="true">Hide Timeline</button>
+            </div>
             <div class="map-controls" aria-label="Route board zoom controls">
               <button class="map-btn" id="mapFitBtn" type="button">Fit</button>
               <button class="map-btn" id="mapZoomOutBtn" type="button">−</button>
@@ -65,6 +69,14 @@
           </div>
 
           <div class="fullscreen-map-wrap">
+            <div class="map-entry-overlay" id="mapEntryOverlay">
+              <div>
+                <span class="eyebrow">Interactive Reconstruction</span>
+                <strong>Gunung Tahan Route Board</strong>
+                <p>Explore the mountain route, Raja Azlan Shah’s reported symptoms, the communication track, and linked evidence from one board.</p>
+              </div>
+              <button class="primary-action" id="enterMapBtn" type="button">Enter Map</button>
+            </div>
             <div class="route-stage zoomable-map" id="routeStage" aria-label="Zoomable Gunung Tahan route board">
               <div class="map-canvas" id="mapCanvas">
                 <img id="routeBoardImage" src="assets/images/gunung-tahan-route-board.png" alt="False Summits Gunung Tahan Route Board visual reconstruction" draggable="false" />
@@ -73,6 +85,7 @@
             </div>
 
             <aside class="inspector-panel inspector-overlay" id="inspectorPanel" aria-live="polite">
+              <button class="inspector-collapse-x" id="inspectorCloseBtn" type="button" aria-label="Hide inspector">×</button>
               <div class="inspector-empty">
                 <span class="eyebrow">Inspector</span>
                 <h2>Select a route marker, timeline row, symptom, or issue.</h2>
