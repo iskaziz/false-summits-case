@@ -1,8 +1,8 @@
-# False Summits: Interactive Case Archive — V5 Zoom Route Board
+# False Summits: Interactive Case Archive — V6 Fullscreen Route Board
 
 Static microsite prototype for the feature documentary **False Summits**.
 
-Version 5 keeps the compact five-section archive structure and upgrades the route board into a full zoomable map viewer.
+Version 6 makes the route board the dominant full-screen element. Supporting archive controls are compressed into the header and footer so the visual reconstruction remains on screen.
 
 ## Sections
 
@@ -74,3 +74,14 @@ This build corrects the route board zoom behaviour:
 - Zoom now starts from the fitted full-board view, not from a cropped 100% image view.
 - Hotspots are locked to the same image coordinate layer, so they stay aligned while zooming and panning.
 - Visible hotspot markers are now small labelled dots (`M1–M5`, `C1–C3`, `D`) instead of misleading sequential numbers.
+
+
+## V6 Fullscreen Layout
+
+- The **Case Board** is now structured as a fullscreen route-board experience.
+- The route board occupies the main viewport area.
+- Layer controls and zoom controls sit above the map.
+- Archive counters remain visible in the top strip.
+- The inspector is now an overlay panel inside the map area so the board remains visible.
+- The compressed timeline rail moves to the footer strip beneath the map.
+- Evidence, People, Questions, and Film remain available through the main navigation.

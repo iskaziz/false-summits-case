@@ -33,46 +33,38 @@
     </header>
 
     <main id="archiveContent">
-      <section class="page-section is-active" id="caseboard" data-page-title="Case Board">
-        <div class="compact-hero">
-          <div>
-            <span class="eyebrow">Compact Case Board</span>
-            <h1>False Summits: Gunung Tahan Route Board</h1>
-            <p>The main archive now works as a split-screen investigation board: route, timeline, medical distress, communication track, and evidence all resolve into one inspector panel.</p>
+      <section class="page-section is-active caseboard-fullscreen" id="caseboard" data-page-title="Case Board">
+        <div class="fullscreen-board-shell">
+          <div class="caseboard-topbar">
+            <div class="caseboard-title-block">
+              <span class="eyebrow">Primary Reconstruction Layer</span>
+              <h1>Gunung Tahan Route Board</h1>
+              <p>The route board is now the central interface. Core archive tools remain accessible through the header, while the map, inspector, and timeline rail stay on screen.</p>
+            </div>
+            <div class="caseboard-counter-block">
+              <div class="dashboard-strip dashboard-strip--compact" id="dashboardCounters" aria-label="Archive counters"></div>
+            </div>
           </div>
-          <div class="dashboard-strip" id="dashboardCounters" aria-label="Archive counters"></div>
-        </div>
 
-        <div class="start-row" id="startSteps" aria-label="Start here guide"></div>
-
-        <div class="caseboard-layout">
-          <section class="board-panel" aria-label="Interactive route board">
-            <div class="board-toolbar">
-              <div>
-                <span class="eyebrow">Board Layers</span>
-                <h2>Mountain + Ground Track</h2>
-              </div>
-              <div class="layer-tabs" id="caseLayerTabs" role="tablist" aria-label="Case board layers">
-                <button class="layer-tab is-active" type="button" data-layer="all">All</button>
-                <button class="layer-tab" type="button" data-layer="route">Route</button>
-                <button class="layer-tab" type="button" data-layer="medical">Medical</button>
-                <button class="layer-tab" type="button" data-layer="communication">Communication</button>
-                <button class="layer-tab" type="button" data-layer="timeline">Timeline</button>
-              </div>
+          <div class="caseboard-subbar">
+            <div class="layer-tabs" id="caseLayerTabs" role="tablist" aria-label="Case board layers">
+              <button class="layer-tab is-active" type="button" data-layer="all">All</button>
+              <button class="layer-tab" type="button" data-layer="route">Route</button>
+              <button class="layer-tab" type="button" data-layer="medical">Medical</button>
+              <button class="layer-tab" type="button" data-layer="communication">Communication</button>
+              <button class="layer-tab" type="button" data-layer="timeline">Timeline</button>
             </div>
-
-            <div class="map-toolbar" aria-label="Route board zoom controls">
-              <div class="map-toolbar__hint">Full board shown first. Zoom in to inspect route, symptoms, and communication track.</div>
-              <div class="map-controls">
-                <button class="map-btn" id="mapFitBtn" type="button">Fit</button>
-                <button class="map-btn" id="mapZoomOutBtn" type="button">−</button>
-                <span class="zoom-readout" id="zoomReadout">100%</span>
-                <button class="map-btn" id="mapZoomInBtn" type="button">+</button>
-                <button class="map-btn" id="mapResetBtn" type="button">Reset</button>
-                <button class="map-btn" id="mapFullscreenBtn" type="button">Full screen</button>
-              </div>
+            <div class="map-controls" aria-label="Route board zoom controls">
+              <button class="map-btn" id="mapFitBtn" type="button">Fit</button>
+              <button class="map-btn" id="mapZoomOutBtn" type="button">−</button>
+              <span class="zoom-readout" id="zoomReadout">100%</span>
+              <button class="map-btn" id="mapZoomInBtn" type="button">+</button>
+              <button class="map-btn" id="mapResetBtn" type="button">Reset</button>
+              <button class="map-btn" id="mapFullscreenBtn" type="button">Full screen</button>
             </div>
+          </div>
 
+          <div class="fullscreen-map-wrap">
             <div class="route-stage zoomable-map" id="routeStage" aria-label="Zoomable Gunung Tahan route board">
               <div class="map-canvas" id="mapCanvas">
                 <img id="routeBoardImage" src="assets/images/gunung-tahan-route-board.png" alt="False Summits Gunung Tahan Route Board visual reconstruction" draggable="false" />
@@ -80,13 +72,24 @@
               </div>
             </div>
 
-            <div class="map-help-row">
-              <span>Drag to pan after zooming.</span>
-              <span>Click numbered markers to inspect Raja-focused route and communication details.</span>
-            </div>
+            <aside class="inspector-panel inspector-overlay" id="inspectorPanel" aria-live="polite">
+              <div class="inspector-empty">
+                <span class="eyebrow">Inspector</span>
+                <h2>Select a route marker, timeline row, symptom, or issue.</h2>
+                <p>Details appear here while the full route board remains visible.</p>
+              </div>
+            </aside>
+          </div>
 
-            <div class="compressed-rail" id="compressedRail" aria-label="Compressed timeline rail"></div>
-          </section>
+          <div class="caseboard-bottombar">
+            <div class="map-help-row map-help-row--footer">
+              <span>Full board visible by default. Use Fit or Reset to return to overview.</span>
+              <span>Drag to pan after zooming. Select markers to inspect Raja-focused milestones.</span>
+            </div>
+            <div class="compressed-rail compressed-rail--footer" id="compressedRail" aria-label="Compressed timeline rail"></div>
+          </div>
+        </div>
+      </section>
 
           <aside class="inspector-panel" id="inspectorPanel" aria-live="polite">
             <div class="inspector-empty">
