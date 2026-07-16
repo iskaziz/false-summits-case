@@ -53,11 +53,8 @@
 
   function init(){
     bindNav();
-    renderCounters();
-    renderStartSteps();
     renderRouteBoard();
     bindMapControls();
-    bindV61Controls();
     resetMapView();
     renderCompressedRail();
     renderMilestoneTracks();
@@ -89,47 +86,6 @@
     $('#primaryNav')?.classList.remove('is-open');
     $('#navToggle')?.setAttribute('aria-expanded','false');
     window.scrollTo({top:0, behavior:'smooth'});
-  }
-
-  function renderCounters(){
-    const target = $('#dashboardCounters');
-    if(!target) return;
-    const counters = [
-      ['Timeline', data.timelineEvents.length],
-      ['Evidence', data.evidenceItems.length],
-      ['People', data.people.length],
-      ['Medical', data.medicalMarkers.length],
-      ['Questions', data.discrepancies.length]
-    ];
-    target.innerHTML = counters.map(([label,value]) => `<article class="counter-card"><strong>${value}</strong><span>${escapeHtml(label)}</span></article>`).join('');
-  }
-
-  function renderStartSteps(){
-    const target = $('#startSteps');
-    if(!target) return;
-    const steps = data.startHereSteps.length ? data.startHereSteps : [
-      {number:'01',title:'What happened?',copy:'Open the timeline layer.',target:'caseboard'},
-      {number:'02',title:'Where did it happen?',copy:'Follow the route board.',target:'caseboard'},
-      {number:'03',title:'What symptoms were reported?',copy:'Use the medical layer.',target:'caseboard'},
-      {number:'04',title:'What decisions were made?',copy:'Inspect decision points.',target:'caseboard'},
-      {number:'05',title:'What remains unresolved?',copy:'Open Questions.',target:'questions'}
-    ];
-    target.innerHTML = steps.map(step => `
-      <button class="start-step" type="button" data-start-target="${step.target || 'caseboard'}">
-        <span>${escapeHtml(step.number || '')}</span><strong>${escapeHtml(step.title)}</strong><p>${escapeHtml(step.copy || '')}</p>
-      </button>`).join('');
-    $$('[data-start-target]', target).forEach(btn => btn.addEventListener('click', () => {
-      const targetId = btn.dataset.startTarget || 'caseboard';
-      if(['overview','timeline','route','medical','relationships','photos','discrepancies'].includes(targetId)){
-        showSection('caseboard');
-        state.layer = layerFromLegacyTarget(targetId);
-        updateLayerTabs(); renderRouteBoard(); renderCompressedRail(); renderInspector();
-      } else showSection(targetId);
-    }));
-  }
-
-  function layerFromLegacyTarget(target){
-    return {overview:'all',timeline:'timeline',route:'route',medical:'medical',relationships:'all',photos:'all',discrepancies:'communication'}[target] || 'all';
   }
 
   function renderRouteBoard(){
@@ -338,48 +294,14 @@
     }
   }
 
-
-  function bindV61Controls(){
-    const inspectorToggle = $('#inspectorToggleBtn');
-    const inspectorClose = $('#inspectorCloseBtn');
-    const railToggle = $('#railToggleBtn');
-    const enterMap = $('#enterMapBtn');
-
-    const setInspector = (open) => {
-      document.body.classList.toggle('inspector-collapsed', !open);
-      if(inspectorToggle){
-        inspectorToggle.textContent = open ? 'Hide Inspector' : 'Show Inspector';
-        inspectorToggle.setAttribute('aria-expanded', String(open));
-      }
-    };
-
-    const setRail = (open) => {
-      document.body.classList.toggle('rail-collapsed', !open);
-      if(railToggle){
-        railToggle.textContent = open ? 'Hide Timeline' : 'Show Timeline';
-        railToggle.setAttribute('aria-expanded', String(open));
-      }
-      requestAnimationFrame(updateMapTransform);
-    };
-
-    inspectorToggle?.addEventListener('click', () => setInspector(document.body.classList.contains('inspector-collapsed')));
-    inspectorClose?.addEventListener('click', () => setInspector(false));
-    railToggle?.addEventListener('click', () => setRail(document.body.classList.contains('rail-collapsed')));
-    enterMap?.addEventListener('click', () => {
-      document.body.classList.add('map-entered', 'focus-map-mode');
-      setInspector(false);
-      if(window.innerWidth < 760) setRail(false);
-      requestAnimationFrame(resetMapView);
-    });
-
-    if(window.innerWidth < 760){
-      setRail(false);
-      setInspector(false);
-    }
-  }
-
   function updateLayerTabs(){
     $$('#caseLayerTabs .layer-tab').forEach(btn => btn.classList.toggle('is-active', btn.dataset.layer === state.layer));
+  }
+
+  function isTimelineRelevantMarker(m){
+    const ids = m && m.linkedTimelineEvents;
+    if(!Array.isArray(ids) || ids.length === 0) return false;
+    return ids.some(id => !!findById(data.timelineEvents, id));
   }
 
   function filteredMarkers(){
@@ -387,7 +309,7 @@
     if(state.layer === 'medical') return data.routeMarkers.filter(m => ['medical','decision'].includes(m.markerType));
     if(state.layer === 'communication') return data.routeMarkers.filter(m => ['communication','debrief'].includes(m.markerType));
     if(state.layer === 'route') return data.routeMarkers.filter(m => ['route','briefing','decision'].includes(m.markerType));
-    if(state.layer === 'timeline') return data.routeMarkers;
+    if(state.layer === 'timeline') return data.routeMarkers.filter(isTimelineRelevantMarker);
     return data.routeMarkers;
   }
 
@@ -653,10 +575,13 @@
   }
 
   function openModal(html){
-    $('#modalContent').innerHTML = html;
+    const content = $('#modalContent');
+    content.innerHTML = html;
+    const heading = $('h2', content);
+    if(heading) heading.id = 'modalTitle';
     const modal = $('#detailModal');
     modal.setAttribute('aria-hidden','false');
-    bindInspectorActions($('#modalContent'));
+    bindInspectorActions(content);
   }
 
   function closeModal(){ $('#detailModal')?.setAttribute('aria-hidden','true'); }

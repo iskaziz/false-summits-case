@@ -46,20 +46,35 @@ No build tools, backend, or framework are required.
 
 ## Editing Hotspots
 
-Route-board hotspots are stored in `data.js` under `routeMarkers`.
+Route-board hotspots are stored in `data.js` under `routeMarkers`. Each entry positions one clickable dot on the route-board image and feeds the marker inspector, the Milestone Tracks panel, and the Case Board layer tabs.
 
-Each marker uses percentage coordinates:
+Example marker (values below are placeholders — replace with real content, not evidentiary text):
 
 ```js
 {
-  id: "RM-001",
-  title: "Sungai Relau Base Camp",
-  x: 10,
-  y: 34
+  id: "RM-001",              // required — unique ID, used for lookups and links
+  title: "Example Waypoint",  // required — shown as the inspector heading and hotspot tooltip
+  x: 11,                      // required — horizontal position, percent of image width (0–100)
+  y: 45.7,                    // required — vertical position, percent of image height (0–100)
+  mapLabel: "M1",             // optional — short label shown on the hotspot itself; falls back to shortLabel or blank
+  markerType: "briefing",     // optional — controls hotspot color and which layer tab includes it
+                               //   (e.g. "briefing" | "medical" | "decision" | "route" | "communication" | "debrief"); defaults to "route" if omitted
+  track: "Mountain Elevation Milestones", // optional — must exactly match "Mountain Elevation Milestones" or
+                               //   "Ground Communication Track" to appear in the Milestone Tracks panel; other markers still
+                               //   appear on the map but are not grouped into either track lane
+  linkedTimelineEvents: ["TL-001"], // optional — IDs from `timelineEvents`; shown in the marker's "Linked timeline" list and
+                               //   required (at least one ID that resolves to a real timelineEvents record) for the marker
+                               //   to appear under the Case Board "Timeline" layer tab
+  location: "Example Location",   // optional — shown in the inspector meta grid
+  keyIssue: "Example issue label", // optional — shown in the inspector meta grid; falls back to "Requires clarification"
+  people: ["P-001"],          // optional — IDs from `people`; rendered as badges
+  evidence: ["FS-TR-001"],    // optional — IDs from `evidenceItems`; shown in the "Linked evidence" list
+  summary: "Example summary text describing this point on the route.", // optional — main inspector body text
+  rajaFocus: "Example note on how this point relates to the case."     // optional — shown in a highlighted callout if present
 }
 ```
 
-Adjust `x` and `y` to reposition a marker relative to the route-board image.
+Only `id`, `title`, `x`, and `y` are required for a hotspot to render and be clickable; every other field is optional and only affects what the inspector, track panel, or layer filters show for that marker.
 
 ## Public Evidence Safety
 
