@@ -34,15 +34,25 @@
 
     <main id="archiveContent">
       <section class="page-section is-active caseboard-map-first" id="caseboard" data-page-title="Case Board">
+        <div class="map-layer-strip">
+          
+          <div class="compact-map-instruction" aria-label="Route board navigation hint">
+            <span>Drag or scroll inside the map to pan</span>
+          </div>
+        </div>
+        <div class="map-layer-strip">
+          <div class="layer-tabs compact-layer-tabs" id="caseLayerTabs" role="tablist" aria-label="Case board layers">
+            <button class="layer-tab is-active" type="button" data-layer="all">All</button>
+            <button class="layer-tab" type="button" data-layer="route">Route</button>
+            <button class="layer-tab" type="button" data-layer="medical">Medical</button>
+            <button class="layer-tab" type="button" data-layer="communication">Communication</button>
+            <button class="layer-tab" type="button" data-layer="timeline">Timeline</button>
+          </div>
+          
+        </div>
         <div class="map-first-shell">
           <div class="map-float-controls" aria-label="Route board controls">
-            <div class="layer-tabs compact-layer-tabs" id="caseLayerTabs" role="tablist" aria-label="Case board layers">
-              <button class="layer-tab is-active" type="button" data-layer="all">All</button>
-              <button class="layer-tab" type="button" data-layer="route">Route</button>
-              <button class="layer-tab" type="button" data-layer="medical">Medical</button>
-              <button class="layer-tab" type="button" data-layer="communication">Comms</button>
-              <button class="layer-tab" type="button" data-layer="timeline">Timeline</button>
-            </div>
+            
             <div class="map-controls compact-map-controls" aria-label="Route board zoom controls">
               <button class="map-btn" id="mapFitBtn" type="button">Fit</button>
               <button class="map-btn" id="mapZoomOutBtn" type="button">−</button>

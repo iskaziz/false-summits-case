@@ -166,3 +166,15 @@ This build corrects the horizontal pan viewer:
 - The top edge, left edge, and right edge are reachable through normal scroll/pan.
 - Hotspot coordinates remain attached to the same image layer.
 - The route board uses full-height fitting first, then horizontal overflow where needed.
+
+
+## V6.4.2 Layer Strip + Scroll Fix
+
+This build fixes two usability issues:
+
+- The All / Route / Medical / Communication / Timeline controls are moved above the map so they no longer block the top of the route board.
+- The map now captures wheel and trackpad scrolling inside the map area.
+- Trackpad vertical scroll pans down the map.
+- Trackpad horizontal scroll pans sideways.
+- Shift + mouse wheel pans horizontally.
+- The floating map control overlay is removed to keep the map unobstructed.

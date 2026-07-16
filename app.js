@@ -177,6 +177,22 @@
       }
     }, true);
 
+    stage.addEventListener('wheel', (event) => {
+      // Keep scrolling inside the map. Trackpads can move both axes;
+      // mouse wheels normally move vertically. Shift+wheel pans horizontally.
+      const absX = Math.abs(event.deltaX);
+      const absY = Math.abs(event.deltaY);
+      if(absX || absY){
+        event.preventDefault();
+        if(event.shiftKey && absY > absX){
+          stage.scrollLeft += event.deltaY;
+        } else {
+          stage.scrollLeft += event.deltaX;
+          stage.scrollTop += event.deltaY;
+        }
+      }
+    }, {passive:false});
+
     window.addEventListener('resize', () => requestAnimationFrame(resetMapView));
   }
 
