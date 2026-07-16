@@ -141,3 +141,17 @@ This build refines the map-first interface:
 - Track cards can be clicked to update the inspector below the map.
 - The map supports pinch-to-zoom on touch devices in addition to zoom buttons and drag-to-pan.
 - The older compressed rail is hidden to avoid duplicate timeline presentation.
+
+
+## V6.4 Horizontal Pan Mode
+
+This build removes zoom/pinch as the primary route-board interaction.
+
+Changes:
+
+- Zoom buttons are removed from the map interface.
+- Pinch zoom is disabled.
+- The route board uses a fixed-height horizontal pan/scroll viewer.
+- Users can drag or horizontally scroll to move across the board.
+- Hotspots remain clickable because they are still locked to the same image layer.
+- Milestone Tracks remain the primary way to navigate detailed route/timeline entries.

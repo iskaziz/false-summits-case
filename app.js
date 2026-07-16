@@ -111,184 +111,110 @@
   }
 
 
+
   function bindMapControls(){
     const stage = $('#routeStage');
     const canvas = $('#mapCanvas');
     if(!stage || !canvas) return;
 
     const img = $('#routeBoardImage');
+    const syncNaturalSize = () => {
+      state.naturalMapWidth = img?.naturalWidth || state.naturalMapWidth;
+      state.naturalMapHeight = img?.naturalHeight || state.naturalMapHeight;
+      canvas.style.width = `${state.naturalMapWidth}px`;
+      canvas.style.height = `${state.naturalMapHeight}px`;
+      resetMapView();
+    };
+
     if(img){
-      const syncNaturalSize = () => {
-        state.naturalMapWidth = img.naturalWidth || state.naturalMapWidth;
-        state.naturalMapHeight = img.naturalHeight || state.naturalMapHeight;
-        canvas.style.width = `${state.naturalMapWidth}px`;
-        canvas.style.height = `${state.naturalMapHeight}px`;
-        resetMapView();
-      };
       if(img.complete) syncNaturalSize();
       else img.addEventListener('load', syncNaturalSize, {once:true});
     }
 
-    $('#mapFitBtn')?.addEventListener('click', resetMapView);
-    $('#mapResetBtn')?.addEventListener('click', resetMapView);
-    $('#mapZoomInBtn')?.addEventListener('click', () => zoomMap(0.22));
-    $('#mapZoomOutBtn')?.addEventListener('click', () => zoomMap(-0.22));
-    $('#mapFullscreenBtn')?.addEventListener('click', toggleMapFullscreen);
+    let isPanning = false;
+    let startX = 0;
+    let startY = 0;
+    let scrollLeft = 0;
+    let scrollTop = 0;
+    let moved = false;
 
     stage.addEventListener('pointerdown', (event) => {
       if(event.target.closest('.hotspot') || event.target.closest('button')) return;
-      state.activePointers.set(event.pointerId, {x:event.clientX, y:event.clientY});
-      stage.setPointerCapture?.(event.pointerId);
-
-      if(state.activePointers.size === 2){
-        const points = Array.from(state.activePointers.values());
-        state.isPinchingMap = true;
-        state.isDraggingMap = false;
-        state.pinchStartDistance = pointerDistance(points[0], points[1]);
-        state.pinchStartZoom = state.mapZoom;
-        state.pinchCenterX = (points[0].x + points[1].x) / 2;
-        state.pinchCenterY = (points[0].y + points[1].y) / 2;
-        stage.classList.add('is-dragging');
-        return;
-      }
-
-      state.isDraggingMap = true;
-      state.dragStartX = event.clientX;
-      state.dragStartY = event.clientY;
-      state.dragBaseX = state.mapX;
-      state.dragBaseY = state.mapY;
+      isPanning = true;
+      moved = false;
+      startX = event.clientX;
+      startY = event.clientY;
+      scrollLeft = stage.scrollLeft;
+      scrollTop = stage.scrollTop;
       stage.classList.add('is-dragging');
+      stage.setPointerCapture?.(event.pointerId);
     });
 
     stage.addEventListener('pointermove', (event) => {
-      if(state.activePointers.has(event.pointerId)){
-        state.activePointers.set(event.pointerId, {x:event.clientX, y:event.clientY});
-      }
-
-      if(state.isPinchingMap && state.activePointers.size >= 2){
-        const points = Array.from(state.activePointers.values()).slice(0,2);
-        const distance = pointerDistance(points[0], points[1]);
-        if(state.pinchStartDistance > 0){
-          const ratio = distance / state.pinchStartDistance;
-          state.mapZoom = clamp(Number((state.pinchStartZoom * ratio).toFixed(2)), 1, 4);
-          const centerX = (points[0].x + points[1].x) / 2;
-          const centerY = (points[0].y + points[1].y) / 2;
-          state.mapX += (centerX - state.pinchCenterX) * .35;
-          state.mapY += (centerY - state.pinchCenterY) * .35;
-          state.pinchCenterX = centerX;
-          state.pinchCenterY = centerY;
-          updateMapTransform();
-        }
-        return;
-      }
-
-      if(!state.isDraggingMap) return;
-      state.mapX = state.dragBaseX + (event.clientX - state.dragStartX);
-      state.mapY = state.dragBaseY + (event.clientY - state.dragStartY);
-      updateMapTransform();
+      if(!isPanning) return;
+      const dx = event.clientX - startX;
+      const dy = event.clientY - startY;
+      if(Math.abs(dx) > 3 || Math.abs(dy) > 3) moved = true;
+      stage.scrollLeft = scrollLeft - dx;
+      stage.scrollTop = scrollTop - dy;
     });
 
-    const stopPointer = (event) => {
-      state.activePointers.delete(event.pointerId);
-      try { stage.releasePointerCapture?.(event.pointerId); } catch(e) {}
-
-      if(state.activePointers.size < 2){
-        state.isPinchingMap = false;
-      }
-      if(state.activePointers.size === 1){
-        const remaining = Array.from(state.activePointers.values())[0];
-        state.isDraggingMap = true;
-        state.dragStartX = remaining.x;
-        state.dragStartY = remaining.y;
-        state.dragBaseX = state.mapX;
-        state.dragBaseY = state.mapY;
-        return;
-      }
-
-      state.isDraggingMap = false;
+    const stopPan = (event) => {
+      if(!isPanning) return;
+      isPanning = false;
       stage.classList.remove('is-dragging');
+      try { stage.releasePointerCapture?.(event.pointerId); } catch(e) {}
     };
-    stage.addEventListener('pointerup', stopPointer);
-    stage.addEventListener('pointercancel', stopPointer);
-    stage.addEventListener('pointerleave', stopPointer);
 
-    stage.addEventListener('wheel', (event) => {
-      if(!event.ctrlKey && !event.metaKey) return;
-      event.preventDefault();
-      zoomMap(event.deltaY < 0 ? 0.12 : -0.12);
-    }, {passive:false});
+    stage.addEventListener('pointerup', stopPan);
+    stage.addEventListener('pointercancel', stopPan);
+    stage.addEventListener('pointerleave', stopPan);
 
-    document.addEventListener('fullscreenchange', () => {
-      if(!document.fullscreenElement) stage.classList.remove('is-fullscreen-fallback');
-      requestAnimationFrame(updateMapTransform);
-    });
+    stage.addEventListener('click', (event) => {
+      if(moved && !event.target.closest('.hotspot')) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }, true);
 
-    window.addEventListener('resize', () => requestAnimationFrame(updateMapTransform));
+    window.addEventListener('resize', () => requestAnimationFrame(resetMapView));
   }
 
-  function zoomMap(delta){
-    const nextZoom = clamp(Number((state.mapZoom + delta).toFixed(2)), 1, 4);
-    if(nextZoom === state.mapZoom) return;
-    state.mapZoom = nextZoom;
-    updateMapTransform();
-  }
+  function zoomMap(){ resetMapView(); }
 
   function resetMapView(){
-    state.mapZoom = 1;
-    state.mapX = 0;
-    state.mapY = 0;
-    updateMapTransform();
-  }
-
-  function calculateFitScale(){
     const stage = $('#routeStage');
-    if(!stage) return 1;
-    const rect = stage.getBoundingClientRect();
-    const pad = 20;
-    const availableW = Math.max(240, rect.width - pad);
-    const availableH = Math.max(240, rect.height - pad);
-    const scale = Math.min(availableW / state.naturalMapWidth, availableH / state.naturalMapHeight);
-    return Math.max(0.12, Math.min(scale, 1));
-  }
-
-  function clampPan(){
-    const stage = $('#routeStage');
-    if(!stage) return;
-    const rect = stage.getBoundingClientRect();
-    const renderedW = state.naturalMapWidth * state.mapScale;
-    const renderedH = state.naturalMapHeight * state.mapScale;
-    const maxX = Math.max(0, (renderedW - rect.width) / 2 + 30);
-    const maxY = Math.max(0, (renderedH - rect.height) / 2 + 30);
-    state.mapX = clamp(state.mapX, -maxX, maxX);
-    state.mapY = clamp(state.mapY, -maxY, maxY);
-  }
-
-  function updateMapTransform(){
     const canvas = $('#mapCanvas');
-    if(!canvas) return;
-    state.fitScale = calculateFitScale();
-    state.mapScale = state.fitScale * state.mapZoom;
-    if(state.mapZoom <= 1.001){
-      state.mapX = 0;
-      state.mapY = 0;
-    } else {
-      clampPan();
-    }
-    canvas.style.width = `${state.naturalMapWidth}px`;
-    canvas.style.height = `${state.naturalMapHeight}px`;
-    canvas.style.transform = `translate(calc(-50% + ${state.mapX}px), calc(-50% + ${state.mapY}px)) scale(${state.mapScale})`;
+    if(!stage || !canvas) return;
+
+    const rect = stage.getBoundingClientRect();
+    const targetHeight = Math.max(360, rect.height - 2);
+    const mapAspect = state.naturalMapWidth / state.naturalMapHeight;
+    const mapWidth = Math.round(targetHeight * mapAspect);
+
+    canvas.style.width = `${mapWidth}px`;
+    canvas.style.height = `${targetHeight}px`;
+    canvas.style.transform = 'none';
+    canvas.style.left = '0';
+    canvas.style.top = '0';
+
+    stage.scrollLeft = 0;
+    stage.scrollTop = 0;
+
     const readout = $('#zoomReadout');
-    if(readout) readout.textContent = `${Math.round(state.mapZoom * 100)}%`;
-    const stage = $('#routeStage');
-    if(stage) stage.classList.toggle('is-zoomed', state.mapZoom > 1.01);
+    if(readout) readout.textContent = 'Pan';
+    stage.classList.remove('is-zoomed');
   }
 
+  function calculateFitScale(){ return 1; }
+  function clampPan(){}
+  function updateMapTransform(){ resetMapView(); }
   function toggleMapFullscreen(){
     const stage = $('#routeStage');
     if(!stage) return;
     if(document.fullscreenElement){ document.exitFullscreen?.(); return; }
     if(stage.requestFullscreen){
-      stage.requestFullscreen().then(() => requestAnimationFrame(updateMapTransform)).catch(() => stage.classList.toggle('is-fullscreen-fallback'));
+      stage.requestFullscreen().catch(() => stage.classList.toggle('is-fullscreen-fallback'));
     } else {
       stage.classList.toggle('is-fullscreen-fallback');
     }

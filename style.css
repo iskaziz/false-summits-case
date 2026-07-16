@@ -462,3 +462,122 @@ body{background:#070807;}
   .zoomable-map .hotspot{width:.75rem!important;height:.75rem!important;}
   .zoomable-map .hotspot-dot{width:.5rem!important;height:.5rem!important;}
 }
+
+
+/* V6.4 horizontal-pan route board: zoom removed, horizontal/vertical pan enabled */
+.map-controls,
+.compact-map-controls,
+.zoom-readout,
+#mapFitBtn,
+#mapZoomOutBtn,
+#mapZoomInBtn,
+#mapResetBtn,
+#mapFullscreenBtn{
+  display:none!important;
+}
+
+.compact-map-instruction{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.36rem .58rem;
+  border:1px solid rgba(215,196,154,.18);
+  border-radius:999px;
+  background:rgba(7,8,7,.72);
+  color:rgba(244,239,227,.82);
+  font-size:.72rem;
+  font-weight:800;
+  backdrop-filter:blur(10px);
+}
+
+.map-bleed.zoomable-map,
+.caseboard-map-first .route-stage.zoomable-map,
+.zoomable-map{
+  overflow:auto!important;
+  touch-action:pan-x pan-y!important;
+  cursor:grab;
+  scroll-behavior:smooth;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(215,196,154,.35) rgba(255,255,255,.06);
+}
+
+.zoomable-map.is-dragging{
+  cursor:grabbing;
+}
+
+.zoomable-map::-webkit-scrollbar{
+  height:8px;
+  width:8px;
+}
+.zoomable-map::-webkit-scrollbar-track{
+  background:rgba(255,255,255,.05);
+}
+.zoomable-map::-webkit-scrollbar-thumb{
+  background:rgba(215,196,154,.35);
+  border-radius:999px;
+}
+
+.map-canvas,
+.map-bleed .map-canvas,
+.route-stage.zoomable-map .map-canvas{
+  position:relative!important;
+  left:auto!important;
+  top:auto!important;
+  transform:none!important;
+  transform-origin:top left!important;
+  height:100%!important;
+  width:auto!important;
+  aspect-ratio:1055/1491!important;
+  margin:0 auto;
+  filter:none!important;
+}
+
+.map-canvas img,
+.zoomable-map .map-canvas img,
+.route-stage.zoomable-map img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:fill!important;
+}
+
+.route-hotspots,
+.zoomable-map .route-hotspots{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+}
+
+.map-bottom-hint span:first-child::after{
+  content:" • Horizontal pan mode";
+}
+
+@media(max-width:900px){
+  .map-canvas,
+  .map-bleed .map-canvas,
+  .route-stage.zoomable-map .map-canvas{
+    margin:0;
+    height:100%!important;
+    min-width:calc(100vh * .708);
+  }
+
+  .compact-map-instruction{
+    font-size:.66rem;
+    padding:.32rem .45rem;
+  }
+}
+
+@media(max-width:760px){
+  .map-float-controls{
+    gap:.25rem!important;
+  }
+
+  .compact-map-instruction{
+    max-width:calc(100vw - .9rem);
+    white-space:normal;
+    line-height:1.15;
+    border-radius:12px;
+  }
+}
