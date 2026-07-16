@@ -36,7 +36,13 @@
     dragStartX: 0,
     dragStartY: 0,
     dragBaseX: 0,
-    dragBaseY: 0
+    dragBaseY: 0,
+    activePointers: new Map(),
+    isPinchingMap: false,
+    pinchStartDistance: 0,
+    pinchStartZoom: 1,
+    pinchCenterX: 0,
+    pinchCenterY: 0
   };
 
   document.addEventListener('DOMContentLoaded', init);
@@ -54,6 +60,7 @@
     bindV61Controls();
     resetMapView();
     renderCompressedRail();
+    renderMilestoneTracks();
     renderInspector();
     populateEvidenceFilters();
     bindEvidenceControls();
@@ -174,31 +181,80 @@
 
     stage.addEventListener('pointerdown', (event) => {
       if(event.target.closest('.hotspot') || event.target.closest('button')) return;
+      state.activePointers.set(event.pointerId, {x:event.clientX, y:event.clientY});
+      stage.setPointerCapture?.(event.pointerId);
+
+      if(state.activePointers.size === 2){
+        const points = Array.from(state.activePointers.values());
+        state.isPinchingMap = true;
+        state.isDraggingMap = false;
+        state.pinchStartDistance = pointerDistance(points[0], points[1]);
+        state.pinchStartZoom = state.mapZoom;
+        state.pinchCenterX = (points[0].x + points[1].x) / 2;
+        state.pinchCenterY = (points[0].y + points[1].y) / 2;
+        stage.classList.add('is-dragging');
+        return;
+      }
+
       state.isDraggingMap = true;
       state.dragStartX = event.clientX;
       state.dragStartY = event.clientY;
       state.dragBaseX = state.mapX;
       state.dragBaseY = state.mapY;
       stage.classList.add('is-dragging');
-      stage.setPointerCapture?.(event.pointerId);
     });
 
     stage.addEventListener('pointermove', (event) => {
+      if(state.activePointers.has(event.pointerId)){
+        state.activePointers.set(event.pointerId, {x:event.clientX, y:event.clientY});
+      }
+
+      if(state.isPinchingMap && state.activePointers.size >= 2){
+        const points = Array.from(state.activePointers.values()).slice(0,2);
+        const distance = pointerDistance(points[0], points[1]);
+        if(state.pinchStartDistance > 0){
+          const ratio = distance / state.pinchStartDistance;
+          state.mapZoom = clamp(Number((state.pinchStartZoom * ratio).toFixed(2)), 1, 4);
+          const centerX = (points[0].x + points[1].x) / 2;
+          const centerY = (points[0].y + points[1].y) / 2;
+          state.mapX += (centerX - state.pinchCenterX) * .35;
+          state.mapY += (centerY - state.pinchCenterY) * .35;
+          state.pinchCenterX = centerX;
+          state.pinchCenterY = centerY;
+          updateMapTransform();
+        }
+        return;
+      }
+
       if(!state.isDraggingMap) return;
       state.mapX = state.dragBaseX + (event.clientX - state.dragStartX);
       state.mapY = state.dragBaseY + (event.clientY - state.dragStartY);
       updateMapTransform();
     });
 
-    const stopDrag = (event) => {
-      if(!state.isDraggingMap) return;
+    const stopPointer = (event) => {
+      state.activePointers.delete(event.pointerId);
+      try { stage.releasePointerCapture?.(event.pointerId); } catch(e) {}
+
+      if(state.activePointers.size < 2){
+        state.isPinchingMap = false;
+      }
+      if(state.activePointers.size === 1){
+        const remaining = Array.from(state.activePointers.values())[0];
+        state.isDraggingMap = true;
+        state.dragStartX = remaining.x;
+        state.dragStartY = remaining.y;
+        state.dragBaseX = state.mapX;
+        state.dragBaseY = state.mapY;
+        return;
+      }
+
       state.isDraggingMap = false;
       stage.classList.remove('is-dragging');
-      try { stage.releasePointerCapture?.(event.pointerId); } catch(e) {}
     };
-    stage.addEventListener('pointerup', stopDrag);
-    stage.addEventListener('pointercancel', stopDrag);
-    stage.addEventListener('pointerleave', stopDrag);
+    stage.addEventListener('pointerup', stopPointer);
+    stage.addEventListener('pointercancel', stopPointer);
+    stage.addEventListener('pointerleave', stopPointer);
 
     stage.addEventListener('wheel', (event) => {
       if(!event.ctrlKey && !event.metaKey) return;
@@ -344,6 +400,52 @@
     else rows = data.timelineEvents.map(e => ({kind:'timeline', id:e.id, kicker:e.timeLabel || e.dateLabel, title:e.title}));
     target.innerHTML = rows.map(row => `<button class="rail-item" type="button" data-kind="${row.kind}" data-id="${row.id}"><span>${escapeHtml(row.kicker||'')}</span><strong>${escapeHtml(row.title)}</strong></button>`).join('');
     $$('.rail-item', target).forEach(btn => btn.addEventListener('click', () => renderInspector({type:btn.dataset.kind, id:btn.dataset.id})));
+  }
+
+
+  function renderMilestoneTracks(){
+    const target = $('#milestoneTracks');
+    if(!target) return;
+    const mountain = data.routeMarkers.filter(m => m.track === 'Mountain Elevation Milestones');
+    const comms = data.routeMarkers.filter(m => m.track === 'Ground Communication Track');
+    const timeline = data.timelineEvents;
+
+    target.innerHTML = `
+      ${trackLaneHtml('Mountain Elevation Milestones', 'Raja-focused route sequence from Sungai Relau to the night push toward Kem Botak.', mountain, 'marker')}
+      ${trackLaneHtml('Ground Communication Track', 'Information pathway, delayed disclosure, and formal debriefing sequence.', comms, 'marker')}
+      ${trackLaneHtml('Chronological Timeline', 'All timeline entries in compact order; click any row to inspect details below.', timeline, 'timeline')}
+    `;
+
+    $$('[data-track-kind]', target).forEach(btn => btn.addEventListener('click', () => {
+      const kind = btn.dataset.trackKind;
+      const id = btn.dataset.trackId;
+      if(kind === 'marker'){
+        state.selectedMarkerId = id;
+        renderRouteBoard();
+        renderInspector({type:'marker', id});
+        document.getElementById('inspectorPanel')?.scrollIntoView({block:'nearest', behavior:'smooth'});
+      } else if(kind === 'timeline'){
+        renderInspector({type:'timeline', id});
+        document.getElementById('inspectorPanel')?.scrollIntoView({block:'nearest', behavior:'smooth'});
+      }
+    }));
+  }
+
+  function trackLaneHtml(title, summary, items, kind){
+    return `<article class="track-lane track-lane--${kind}">
+      <div class="track-lane__head"><h3>${escapeHtml(title)}</h3><p>${escapeHtml(summary)}</p></div>
+      <div class="track-lane__items">
+        ${items.map((item, idx) => {
+          const label = item.mapLabel || String(idx+1).padStart(2,'0');
+          const kicker = item.timeLabel || item.location || item.dateLabel || item.track || '';
+          const titleText = item.title || item.symptom || '';
+          return `<button class="track-card ${item.markerType ? 'track-card--'+escapeAttr(item.markerType) : ''}" type="button" data-track-kind="${kind}" data-track-id="${item.id}">
+            <span class="track-card__label">${escapeHtml(label)}</span>
+            <span class="track-card__body"><strong>${escapeHtml(titleText)}</strong><small>${escapeHtml(kicker)}</small></span>
+          </button>`;
+        }).join('')}
+      </div>
+    </article>`;
   }
 
   function renderInspector(selection){
@@ -563,6 +665,7 @@
   function unique(arr){ return Array.from(new Set(arr.filter(Boolean))); }
   function personName(id){ return findById(data.people,id)?.name || id; }
   function issueTitle(id){ return findById(data.issueThreads,id)?.title || (String(id).startsWith('ISS-') ? id : null); }
+  function pointerDistance(a,b){ return Math.hypot(a.x - b.x, a.y - b.y); }
   function clamp(value, min, max){ return Math.min(max, Math.max(min, value)); }
   function truncate(s,n){ return String(s).length > n ? String(s).slice(0,n-1)+'…' : String(s); }
   function badgeRow(items, tone=''){

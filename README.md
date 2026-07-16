@@ -112,3 +112,17 @@ Changes:
 - Header and footer are slimmer.
 
 The map remains zoomable and pannable, with hotspots still aligned to the route-board image coordinate layer.
+
+## V6.3 Track Navigation + Pinch Zoom
+
+This build refines the map-first interface:
+
+- Hotspot labels are suppressed on the map to reduce overlap.
+- Hotspots are now smaller subtle dots for direct map selection.
+- A compact **Milestone Tracks** panel below the map displays:
+  - Mountain Elevation Milestones
+  - Ground Communication Track
+  - Chronological Timeline
+- Track cards can be clicked to update the inspector below the map.
+- The map supports pinch-to-zoom on touch devices in addition to zoom buttons and drag-to-pan.
+- The older compressed rail is hidden to avoid duplicate timeline presentation.

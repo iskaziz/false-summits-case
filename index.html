@@ -61,12 +61,20 @@
           </div>
 
           <div class="map-bottom-hint">
-            <span>Full route board shown first. Zoom to inspect details, then drag to pan.</span>
-            <span>Tap markers for Raja-focused evidence and milestone notes.</span>
+            <span>Full route board shown first. Pinch or use controls to zoom, then drag to pan.</span>
+            <span>Use the compact route/timeline tracks below instead of crowded map labels.</span>
           </div>
         </div>
 
         <div class="caseboard-below">
+          <section class="track-board" aria-label="Route and timeline tracks">
+            <div class="track-board-heading">
+              <div><span class="eyebrow">Route + Timeline</span><h2>Milestone tracks</h2></div>
+              <p>Use these compact tracks to navigate the same events without overlapping hotspots on the map.</p>
+            </div>
+            <div class="milestone-tracks" id="milestoneTracks"></div>
+          </section>
+
           <aside class="inspector-panel inspector-below" id="inspectorPanel" aria-live="polite">
             <div class="inspector-empty">
               <span class="eyebrow">Inspector</span>
