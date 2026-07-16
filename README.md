@@ -155,3 +155,14 @@ Changes:
 - Users can drag or horizontally scroll to move across the board.
 - Hotspots remain clickable because they are still locked to the same image layer.
 - Milestone Tracks remain the primary way to navigate detailed route/timeline entries.
+
+
+## V6.4.1 Pan Crop Fix
+
+This build corrects the horizontal pan viewer:
+
+- The map canvas now starts at the true top-left of the image.
+- The image is no longer centered with hidden overflow.
+- The top edge, left edge, and right edge are reachable through normal scroll/pan.
+- Hotspot coordinates remain attached to the same image layer.
+- The route board uses full-height fitting first, then horizontal overflow where needed.

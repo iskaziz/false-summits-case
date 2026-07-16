@@ -188,12 +188,23 @@
     if(!stage || !canvas) return;
 
     const rect = stage.getBoundingClientRect();
-    const targetHeight = Math.max(360, rect.height - 2);
+    const availableH = Math.max(360, rect.height);
+    const availableW = Math.max(320, rect.width);
     const mapAspect = state.naturalMapWidth / state.naturalMapHeight;
-    const mapWidth = Math.round(targetHeight * mapAspect);
+
+    // Fit height first so the full top-to-bottom board is visible.
+    // If that would make the image narrower than the viewport, fit width instead.
+    let mapHeight = availableH;
+    let mapWidth = Math.round(mapHeight * mapAspect);
+    if(mapWidth < availableW){
+      mapWidth = availableW;
+      mapHeight = Math.round(mapWidth / mapAspect);
+    }
 
     canvas.style.width = `${mapWidth}px`;
-    canvas.style.height = `${targetHeight}px`;
+    canvas.style.height = `${mapHeight}px`;
+    canvas.style.minWidth = `${mapWidth}px`;
+    canvas.style.minHeight = `${mapHeight}px`;
     canvas.style.transform = 'none';
     canvas.style.left = '0';
     canvas.style.top = '0';
