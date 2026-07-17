@@ -178,3 +178,20 @@ This build fixes two usability issues:
 - Trackpad horizontal scroll pans sideways.
 - Shift + mouse wheel pans horizontally.
 - The floating map control overlay is removed to keep the map unobstructed.
+
+
+## V6.4.3 Hotspot Tooltips
+
+- Added tooltip labels to map hotspots.
+- Tooltips appear on hover, keyboard focus, and selected hotspots.
+- Tooltips use the milestone title text so users can identify markers before clicking.
+
+
+## V6.4.4 Smart Hotspot Labels
+
+This build refines hotspot labels:
+
+- Desktop and tablet show tiny always-visible marker labels, such as M1, C1, and D.
+- Full descriptive tooltips still appear on hover, keyboard focus, and selected hotspots.
+- Mobile hides permanent labels to avoid clutter.
+- Mobile users see the descriptive tooltip after tapping/selecting a hotspot.

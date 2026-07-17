@@ -757,3 +757,142 @@ body{background:#070807;}
     min-height:390px;
   }
 }
+
+
+/* V6.4.3 hotspot tooltips */
+.zoomable-map .hotspot::after,
+.zoomable-map .hotspot::before{
+  position:absolute;
+  left:50%;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .16s ease, transform .16s ease;
+  z-index:12;
+}
+.zoomable-map .hotspot::after{
+  content:attr(data-tooltip);
+  bottom:calc(100% + 12px);
+  transform:translateX(-50%) translateY(4px);
+  background:rgba(12,14,13,.96);
+  color:var(--paper-light);
+  border:1px solid rgba(215,196,154,.32);
+  border-radius:10px;
+  padding:.34rem .5rem;
+  font-size:.66rem;
+  font-weight:800;
+  line-height:1.2;
+  white-space:nowrap;
+  box-shadow:0 10px 24px rgba(0,0,0,.34);
+  max-width:220px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.zoomable-map .hotspot::before{
+  content:"";
+  bottom:calc(100% + 5px);
+  transform:translateX(-50%) translateY(4px);
+  border-left:6px solid transparent;
+  border-right:6px solid transparent;
+  border-top:7px solid rgba(12,14,13,.96);
+}
+.zoomable-map .hotspot:hover::after,
+.zoomable-map .hotspot:hover::before,
+.zoomable-map .hotspot:focus-visible::after,
+.zoomable-map .hotspot:focus-visible::before,
+.zoomable-map .hotspot.is-selected::after,
+.zoomable-map .hotspot.is-selected::before{
+  opacity:1;
+}
+.zoomable-map .hotspot:hover::after,
+.zoomable-map .hotspot:focus-visible::after,
+.zoomable-map .hotspot.is-selected::after{
+  transform:translateX(-50%) translateY(0);
+}
+.zoomable-map .hotspot:hover::before,
+.zoomable-map .hotspot:focus-visible::before,
+.zoomable-map .hotspot.is-selected::before{
+  transform:translateX(-50%) translateY(0);
+}
+@media(max-width:760px){
+  .zoomable-map .hotspot::after{
+    font-size:.62rem;
+    max-width:170px;
+    white-space:normal;
+    text-align:center;
+  }
+}
+
+
+/* V6.4.4 smart hotspot labels:
+   Desktop/tablet: tiny always-visible labels.
+   Mobile: labels stay hidden until tap/focus/selection. */
+.zoomable-map .hotspot-label{
+  display:inline-flex!important;
+  position:absolute;
+  left:50%;
+  top:calc(100% + .22rem);
+  transform:translateX(-50%);
+  align-items:center;
+  justify-content:center;
+  min-width:1.35rem;
+  padding:.1rem .28rem;
+  border:1px solid rgba(215,196,154,.26);
+  border-radius:999px;
+  background:rgba(7,8,7,.72);
+  color:var(--paper);
+  font-size:.52rem;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.03em;
+  white-space:nowrap;
+  pointer-events:none;
+  box-shadow:0 5px 14px rgba(0,0,0,.24);
+}
+
+.zoomable-map .hotspot.is-muted .hotspot-label{
+  opacity:.35;
+}
+
+.zoomable-map .hotspot:hover .hotspot-label,
+.zoomable-map .hotspot:focus-visible .hotspot-label,
+.zoomable-map .hotspot.is-selected .hotspot-label{
+  background:var(--paper);
+  color:#15130f;
+  border-color:var(--paper);
+}
+
+.zoomable-map .hotspot::after{
+  min-width:max-content;
+}
+
+/* Prevent labels from covering too much of the map while keeping orientation cues visible. */
+.zoomable-map .hotspot:not(:hover):not(:focus-visible):not(.is-selected)::after,
+.zoomable-map .hotspot:not(:hover):not(:focus-visible):not(.is-selected)::before{
+  display:none;
+}
+
+/* Mobile: hide permanent mini labels; use tap/focus/selected tooltip only. */
+@media(max-width:760px){
+  .zoomable-map .hotspot-label{
+    display:none!important;
+  }
+
+  .zoomable-map .hotspot::after,
+  .zoomable-map .hotspot::before{
+    opacity:0;
+  }
+
+  .zoomable-map .hotspot:focus-visible::after,
+  .zoomable-map .hotspot:focus-visible::before,
+  .zoomable-map .hotspot.is-selected::after,
+  .zoomable-map .hotspot.is-selected::before{
+    opacity:1;
+  }
+}
+
+/* Very small screens: place selected tooltip below when near top to reduce clipping risk. */
+@media(max-width:520px){
+  .zoomable-map .hotspot::after{
+    max-width:150px;
+  }
+}

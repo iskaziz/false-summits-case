@@ -96,7 +96,7 @@
       const muted = markers.includes(m) ? '' : ' is-muted';
       const selected = state.selectedMarkerId === m.id ? ' is-selected' : '';
       const label = m.mapLabel || m.shortLabel || '';
-      return `<button class="hotspot${muted}${selected}" data-marker-id="${m.id}" data-type="${escapeHtml(m.markerType || 'route')}" style="left:${Number(m.x)||50}%;top:${Number(m.y)||50}%" type="button" title="${escapeAttr(m.title)}" aria-label="Open ${escapeAttr(m.title)}"><span class="hotspot-dot"></span><span class="hotspot-label">${escapeHtml(label)}</span></button>`;
+      return `<button class="hotspot${muted}${selected}" data-marker-id="${m.id}" data-type="${escapeHtml(m.markerType || 'route')}" data-tooltip="${escapeAttr(m.title)}" style="left:${Number(m.x)||50}%;top:${Number(m.y)||50}%" type="button" title="${escapeAttr(m.title)}" aria-label="Open ${escapeAttr(m.title)}"><span class="hotspot-dot"></span><span class="hotspot-label">${escapeHtml(label)}</span></button>`;
     }).join('');
     $$('.hotspot', target).forEach(btn => btn.addEventListener('click', () => {
       state.selectedMarkerId = btn.dataset.markerId;
